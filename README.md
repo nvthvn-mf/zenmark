@@ -66,7 +66,7 @@ It seamlessly synchronizes your data between your local device (IndexedDB) and t
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/YOUR_USERNAME/zenmark.git
+   git clone https://github.com/nvthvn_mf/zenmark.git
    cd zenmark
    ```
 
