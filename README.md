@@ -135,29 +135,3 @@ Feel free to submit a Pull Request or open an issue for discussion.
 This project is licensed under the **MIT License**.
 
 ---
-
-## 🧠 Improvements Over the Previous Version
-
-1. **Removed Google Image**  
-   Replaced with Shields.io badges for a more professional look.
-
-2. **Offline-First Highlighted**  
-   Core architectural strength (`SyncController` + `Dexie`) is now clearly emphasized.
-
-3. **SQL Schema Included**  
-   Allows anyone cloning the repo to quickly configure Supabase without guesswork.
-
-4. **Clear Structure**  
-   Well-defined sections for features, setup, tech stack, and contribution.
-
----
-
-## 🔧 Git Commit
-
-Once the README is updated, commit it with:
-
-```bash
-git add README.md
-git commit -m "docs: update README with project specific details"
-git push
-```
