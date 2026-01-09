@@ -1,0 +1,5 @@
+{
+  "name": "ZenMark",
+  "description": "A high-performance, offline-first personal Markdown editor with cloud sync, versioning, and export capabilities. Built with React, Milkdown, and Supabase.",
+  "requestFramePermissions": []
+}
