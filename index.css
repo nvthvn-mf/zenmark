@@ -1,0 +1,14 @@
+/* Personnalisation Milkdown */
+.milkdown .editor {
+    outline: none !important;
+    padding-bottom: 50vh; /* Permet de scroller plus bas que la dernière ligne */
+}
+
+/* Cache la barre de scroll mais permet le défilement */
+.no-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+.no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
