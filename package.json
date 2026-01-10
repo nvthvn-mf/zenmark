@@ -9,11 +9,18 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@milkdown/core": "^7.18.0",
+    "@milkdown/ctx": "^7.18.0",
+    "@milkdown/plugin-history": "^7.18.0",
+    "@milkdown/plugin-listener": "^7.18.0",
+    "@milkdown/preset-commonmark": "^7.18.0",
+    "@milkdown/react": "^7.18.0",
+    "@milkdown/theme-nord": "^7.18.0",
+    "@supabase/supabase-js": "^2.90.1",
+    "dexie": "^4.2.1",
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
-    "dexie": "^4.2.1",
-    "uuid": "^13.0.0",
-    "@supabase/supabase-js": "^2.90.1"
+    "uuid": "^13.0.0"
   },
   "devDependencies": {
     "@types/node": "^22.14.0",
