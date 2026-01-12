@@ -30,8 +30,7 @@ const DashboardView: React.FC<DashboardViewProps> = ({ user, documents, onOpenDo
                 <div className="relative bg-white rounded-3xl p-8 shadow-sm border border-slate-100 overflow-hidden">
                     <div className="relative z-10">
                         <h1 className="text-3xl font-bold text-slate-800 mb-2">
-                            {greeting}, {user?.user_metadata?.full_name || user?.email?.split('@')[0]} 👋
-                        </h1>
+                            {greeting}, {user?.user_metadata?.first_name || user?.email?.split('@')[0]} 👋                        </h1>
                         <p className="text-slate-500 text-lg max-w-lg">
                             Prêt à capturer vos idées ? Vous avez {documents.length} document{documents.length > 1 ? 's' : ''} dans votre espace.
                         </p>
