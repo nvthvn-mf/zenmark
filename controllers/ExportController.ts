@@ -2,13 +2,8 @@ import { marked } from 'marked';
 
 export const ExportController = {
   async exportToHTML(title: string, markdown: string): Promise<void> {
-    // 1. Convertir le Markdown en HTML
     const contentHtml = await marked.parse(markdown);
 
-    // 2. Construire le fichier HTML final
-    // - On garde github-markdown-css pour la mise en page globale (propre)
-    // - On ajoute highlight.js (atom-one-dark) pour le style "IDE" des blocs de code
-    // - On ajoute un petit script pour activer la coloration au chargement du fichier
     const html = `
       <!DOCTYPE html>
       <html lang="fr">
@@ -29,14 +24,22 @@ export const ExportController = {
             margin: 0 auto;
             padding: 45px;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+            background-color: #ffffff; /* Fond de la page blanc */
           }
           
-          /* Force l'arrondi et le padding pour faire joli comme dans l'app */
+          /* --- CORRECTION ICI --- */
+          /* On force le bloc <pre> (le cadre) à prendre la couleur de fond de Atom One Dark (#282c34) */
+          .markdown-body pre {
+            background-color: #282c34 !important; 
+            border: 1px solid #282c34 !important;
+            border-radius: 8px !important;
+          }
+
+          /* Ajustement du code à l'intérieur pour qu'il respire */
           pre code.hljs {
-            padding: 1.5em;
-            border-radius: 8px;
             font-family: 'JetBrains Mono', 'Fira Code', monospace;
-            line-height: 1.5;
+            padding: 1.5em !important;
+            background-color: transparent !important; /* Laisse voir le fond du pre */
           }
 
           @media (max-width: 767px) {
@@ -45,6 +48,7 @@ export const ExportController = {
         </style>
       </head>
       <body class="markdown-body">
+        
         ${contentHtml}
 
         <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
@@ -53,7 +57,6 @@ export const ExportController = {
       </html>
     `;
 
-    // 3. Téléchargement
     const blob = new Blob([html], { type: 'text/html' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -64,7 +67,6 @@ export const ExportController = {
   },
 
   async exportToPDF(): Promise<void> {
-    // L'impression native du navigateur respectera aussi les couleurs si l'option "Background graphics" est cochée
     window.print();
   }
 };
