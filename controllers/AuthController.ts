@@ -8,8 +8,18 @@ export const AuthController = {
     return data.user;
   },
 
-  async signUp(email: string, password: string) {
-    const { data, error } = await supabase.auth.signUp({ email, password });
+  async signUp(email: string, password: string, firstName: string, lastName: string) {
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          first_name: firstName,
+          last_name: lastName,
+          full_name: `${firstName} ${lastName}`.trim()
+        }
+      }
+    });
     if (error) throw error;
     return data.user;
   },
