@@ -15,7 +15,6 @@ export const ExportController = {
         </style>
       </head>
       <body>
-        <h1>${title}</h1>
         <div>${this.mockMarkdownToHtml(markdown)}</div>
       </body>
       </html>
