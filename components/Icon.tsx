@@ -35,12 +35,29 @@ const Icon: React.FC<IconProps> = ({ name, className = "", size = 20 }) => {
         ),
         check: <path d="M20 6 9 17l-5-5" />,
         x: <path d="M18 6 6 18M6 6l12 12" />,
-        // Nouvelles icônes
+
+        // --- NOUVELLES ICONES CORRIGÉES ---
         home: <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />,
         file: <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />,
-        grid: <rect width="7" height="7" x="3" y="3" rx="1" /><rect width="7" height="7" x="14" y="3" rx="1" /><rect width="7" height="7" x="14" y="14" rx="1" /><rect width="7" height="7" x="3" y="14" rx="1" />,
-        clock: <circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" />
-};
+
+        // Grid a besoin d'un Fragment car il a 4 <rect>
+        grid: (
+            <>
+                <rect width="7" height="7" x="3" y="3" rx="1" />
+                <rect width="7" height="7" x="14" y="3" rx="1" />
+                <rect width="7" height="7" x="14" y="14" rx="1" />
+                <rect width="7" height="7" x="3" y="14" rx="1" />
+            </>
+        ),
+
+        // Clock a besoin d'un Fragment car il a <circle> et <polyline>
+        clock: (
+            <>
+                <circle cx="12" cy="12" r="10" />
+                <polyline points="12 6 12 12 16 14" />
+            </>
+        )
+    };
 
     return (
         <svg
