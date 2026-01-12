@@ -1,61 +1,60 @@
-import React, { useEffect, useRef } from 'react';
-import { Milkdown, MilkdownProvider, useEditor } from '@milkdown/react';
-import { Editor, rootCtx, defaultValueCtx } from '@milkdown/core';
-import { commonmark } from '@milkdown/preset-commonmark';
-import { nord } from '@milkdown/theme-nord';
-import { listener, listenerCtx } from '@milkdown/plugin-listener';
-import { history } from '@milkdown/plugin-history';
+import React from 'react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 interface MilkdownEditorProps {
-  content: string;
-  onChange: (value: string) => void;
-  readonly?: boolean;
+    content: string;
+    onChange: (value: string) => void;
+    readonly?: boolean;
 }
 
-const EditorComponent: React.FC<MilkdownEditorProps> = ({ content, onChange, readonly }) => {
-  // Hook pour créer l'instance de l'éditeur
-  const { get } = useEditor((root) =>
-          Editor.make()
-              .config((ctx) => {
-                // Définit l'élément racine (div) où l'éditeur va s'injecter
-                ctx.set(rootCtx, root);
-                // Définit la valeur initiale
-                ctx.set(defaultValueCtx, content);
+const MilkdownEditor: React.FC<MilkdownEditorProps> = ({ content, onChange, readonly = false }) => {
+    return (
+        <div className="flex flex-1 h-full overflow-hidden bg-white">
+            {/* ZONE GAUCHE : ÉDITEUR DE CODE (Masquée si readonly) */}
+            {!readonly && (
+                <div className="w-1/2 h-full border-r border-slate-200 flex flex-col bg-slate-50">
+                    <div className="px-4 py-2 bg-slate-100 border-b border-slate-200 text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                        Markdown Source
+                    </div>
+                    <textarea
+                        className="flex-1 w-full h-full p-6 font-mono text-sm leading-relaxed text-slate-800 bg-transparent resize-none focus:outline-none focus:ring-inset focus:ring-2 focus:ring-indigo-500/50 transition-all"
+                        placeholder="# Commencez à écrire ici..."
+                        value={content}
+                        onChange={(e) => onChange(e.target.value)}
+                        spellCheck={false}
+                    />
+                </div>
+            )}
 
-                // Configure l'écouteur de changements
-                ctx.get(listenerCtx).markdownUpdated((ctx, markdown, prevMarkdown) => {
-                  if (markdown !== prevMarkdown) {
-                    onChange(markdown);
-                  }
-                });
-              })
-              .config(nord) // Applique le thème visuel
-              .use(commonmark) // Active la syntaxe Markdown standard
-              .use(history) // Active Ctrl+Z / Ctrl+Y
-              .use(listener) // Active l'écouteur
-      , []); // Le tableau vide [] assure que l'éditeur ne se recrée pas à chaque rendu
+            {/* ZONE DROITE : APERÇU (Pleine largeur si readonly) */}
+            <div className={`${readonly ? 'w-full max-w-4xl mx-auto' : 'w-1/2'} h-full flex flex-col bg-white`}>
+                {!readonly && (
+                    <div className="px-4 py-2 bg-white border-b border-slate-100 text-xs font-semibold text-slate-500 uppercase tracking-wider flex justify-between items-center">
+                        <span>Preview</span>
+                        <span className="text-[10px] bg-slate-100 px-2 py-0.5 rounded-full">
+              {content.split(/\s+/).filter(Boolean).length} words
+            </span>
+                    </div>
+                )}
 
-  return <Milkdown />;
-};
-
-const MilkdownEditor: React.FC<MilkdownEditorProps> = (props) => {
-  return (
-      <div className="flex flex-col flex-1 h-full overflow-hidden bg-white relative">
-        <div className="flex-1 overflow-y-auto px-8 py-4 prose prose-slate max-w-none mx-auto w-full md:w-[850px]">
-          <MilkdownProvider>
-            <EditorComponent {...props} />
-          </MilkdownProvider>
-        </div>
-
-        {!props.readonly && (
-            <div className="absolute bottom-6 right-8 opacity-40 hover:opacity-100 transition-opacity flex items-center gap-4 text-xs font-medium text-slate-500 bg-white/80 backdrop-blur px-3 py-1.5 rounded-full shadow-sm border pointer-events-none">
-              {/* Compteur de mots simple basé sur les espaces */}
-              <span>{props.content.split(/\s+/).filter(Boolean).length} words</span>
-              <span>{props.content.length} chars</span>
+                {/* Zone de rendu Markdown */}
+                <div className="flex-1 overflow-y-auto p-8 custom-prose">
+                    <article className="prose prose-slate prose-headings:font-bold prose-a:text-indigo-600 max-w-none">
+                        <ReactMarkdown
+                            remarkPlugins={[remarkGfm]}
+                            components={{
+                                // Personnalisation des liens pour qu'ils s'ouvrent dans un nouvel onglet
+                                a: ({node, ...props}) => <a target="_blank" rel="noopener noreferrer" {...props} />
+                            }}
+                        >
+                            {content || '*Rien à afficher...*'}
+                        </ReactMarkdown>
+                    </article>
+                </div>
             </div>
-        )}
-      </div>
-  );
+        </div>
+    );
 };
 
 export default MilkdownEditor;
