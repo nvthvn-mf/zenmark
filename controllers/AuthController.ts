@@ -53,6 +53,33 @@ export const AuthController = {
     return data.user;
   },
 
+  // Dans zenmark/controllers/AuthController.ts
+
+  async updatePassword(oldPassword: string, newPassword: string) {
+    // 1. On récupère l'email de l'utilisateur actuel
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user || !user.email) throw new Error("Utilisateur non identifié");
+
+    // 2. VÉRIFICATION : On essaie de se reconnecter avec l'ANCIEN mot de passe
+    const { error: signInError } = await supabase.auth.signInWithPassword({
+      email: user.email,
+      password: oldPassword
+    });
+
+    if (signInError) {
+      // Si la connexion échoue, c'est que l'ancien mot de passe est faux
+      throw new Error("L'ancien mot de passe est incorrect.");
+    }
+
+    // 3. Si c'est bon, on met à jour avec le NOUVEAU mot de passe
+    const { data, error: updateError } = await supabase.auth.updateUser({
+      password: newPassword
+    });
+
+    if (updateError) throw updateError;
+    return data.user;
+  },
+
   onAuthStateChange(callback: (user: any) => void) {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       callback(session?.user ?? null);
