@@ -1,7 +1,8 @@
-
 import { supabase } from '../services/supabase';
+import { AuthChangeEvent, Session } from '@supabase/supabase-js';
 
 export const AuthController = {
+  // ... (Vos fonctions login, signUp, logout existantes restent identiques) ...
   async login(email: string, password: string) {
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) throw error;
@@ -34,6 +35,7 @@ export const AuthController = {
     return user;
   },
 
+  // --- NOUVEAU : Méthodes pour le profil et le reset ---
 
   async updateProfile(firstName: string, lastName: string) {
     const { data, error } = await supabase.auth.updateUser({
@@ -46,32 +48,40 @@ export const AuthController = {
     if (error) throw error;
     return data.user;
   },
+
   async updateEmail(newEmail: string) {
-    // Supabase gère la double confirmation automatiquement
     const { data, error } = await supabase.auth.updateUser({ email: newEmail });
     if (error) throw error;
     return data.user;
   },
 
-  // Dans zenmark/controllers/AuthController.ts
+  async sendPasswordResetEmail(email: string) {
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: window.location.origin // Redirige vers localhost:3000
+    });
+    if (error) throw error;
+  },
 
-  async updatePassword(oldPassword: string, newPassword: string) {
-    // 1. On récupère l'email de l'utilisateur actuel
+  // Cette fonction change le mot de passe SANS demander l'ancien.
+  // Elle ne fonctionne que si l'utilisateur est connecté (ce qui est le cas après le clic sur le lien).
+  async resetPassword(newPassword: string) {
+    const { data, error } = await supabase.auth.updateUser({ password: newPassword });
+    if (error) throw error;
+    return data.user;
+  },
+
+  // Cette fonction change le mot de passe EN VÉRIFIANT l'ancien (pour le profil)
+  async updatePasswordWithCheck(oldPassword: string, newPassword: string) {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user || !user.email) throw new Error("Utilisateur non identifié");
 
-    // 2. VÉRIFICATION : On essaie de se reconnecter avec l'ANCIEN mot de passe
     const { error: signInError } = await supabase.auth.signInWithPassword({
       email: user.email,
       password: oldPassword
     });
 
-    if (signInError) {
-      // Si la connexion échoue, c'est que l'ancien mot de passe est faux
-      throw new Error("L'ancien mot de passe est incorrect.");
-    }
+    if (signInError) throw new Error("L'ancien mot de passe est incorrect.");
 
-    // 3. Si c'est bon, on met à jour avec le NOUVEAU mot de passe
     const { data, error: updateError } = await supabase.auth.updateUser({
       password: newPassword
     });
@@ -80,9 +90,10 @@ export const AuthController = {
     return data.user;
   },
 
-  onAuthStateChange(callback: (user: any) => void) {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      callback(session?.user ?? null);
+  // MODIFICATION CRITIQUE : On passe l'événement au callback pour détecter PASSWORD_RECOVERY
+  onAuthStateChange(callback: (event: AuthChangeEvent, session: Session | null) => void) {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      callback(event, session);
     });
     return subscription;
   }
