@@ -7,6 +7,7 @@ import { ExportController } from '../controllers/ExportController';
 import { AuthController } from '../controllers/AuthController';
 import MilkdownEditor from '../components/MilkdownEditor';
 import Icon from '../components/Icon';
+import ProfileView from './ProfileView';
 import DashboardView from './DashboardView'; // Import du nouveau dashboard
 
 interface MainViewProps {
@@ -20,6 +21,7 @@ const MainView: React.FC<MainViewProps> = ({ user }) => {
   const [syncStatus, setSyncStatus] = useState<AppStatus>(AppStatus.ONLINE);
   const [showHistory, setShowHistory] = useState(false);
   const [versions, setVersions] = useState<DocumentVersion[]>([]);
+  const [showProfile, setShowProfile] = useState(false);
   // État pour savoir si la sidebar est en mode "réduit" sur mobile (optionnel, gardons simple)
 
   const loadDocs = useCallback(async () => {
@@ -108,7 +110,10 @@ const MainView: React.FC<MainViewProps> = ({ user }) => {
           {/* Navigation */}
           <div className="p-3 lg:p-4 space-y-1">
             <button
-                onClick={() => setActiveDoc(null)} // Retour au Dashboard
+                onClick={() => {
+                  setActiveDoc(null);
+                  setShowProfile(false);
+                }}
                 className={`w-full flex items-center justify-center lg:justify-start gap-3 p-3 rounded-xl transition-all ${
                     !activeDoc ? 'bg-indigo-50 text-indigo-600 font-medium' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900'
                 }`}
@@ -158,8 +163,12 @@ const MainView: React.FC<MainViewProps> = ({ user }) => {
                 <div className={`w-2 h-2 rounded-full ${syncStatus === AppStatus.ONLINE ? 'bg-green-500' : 'bg-amber-500'}`} />
                 <span className="hidden lg:block text-xs text-slate-500 capitalize">{syncStatus}</span>
               </div>
-              <button onClick={() => AuthController.logout()} className="text-slate-400 hover:text-slate-600">
+
+              <button onClick={() => { setShowProfile(true); setActiveDoc(null); }} className="text-slate-400 hover:text-slate-600 transition-colors" title="Paramètres">
                 <Icon name="settings" size={18} />
+              </button>
+              <button onClick={() => AuthController.logout()} className="text-slate-400 hover:text-slate-600">
+                <Icon name="logout" size={18} />
               </button>
             </div>
           </div>
@@ -167,10 +176,17 @@ const MainView: React.FC<MainViewProps> = ({ user }) => {
 
 
         {/* --- MAIN CONTENT AREA --- */}
+        {/* --- MAIN CONTENT AREA --- */}
         <main className="flex-1 flex flex-col min-w-0 bg-slate-50 relative">
 
-          {activeDoc ? (
-              /* MODE ÉDITEUR (Ton ancien code, légèrement nettoyé) */
+          {showProfile ? (
+              /* CAS 1 : MODE PROFIL */
+              <ProfileView
+                  user={user}
+                  onBack={() => setShowProfile(false)}
+              />
+          ) : activeDoc ? (
+              /* CAS 2 : MODE ÉDITEUR */
               <>
                 <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-6 sticky top-0 z-20">
                   <div className="flex-1 mr-4">
@@ -194,7 +210,7 @@ const MainView: React.FC<MainViewProps> = ({ user }) => {
                       <Icon name="download" />
                     </button>
                     <button onClick={() => ExportController.exportToPDF()} className="p-2 text-slate-400 hover:text-indigo-600 rounded-lg hover:bg-indigo-50 transition-all">
-                      <Icon name="search" /> {/* Icone Print/Preview */}
+                      <Icon name="search" />
                     </button>
                   </div>
                 </header>
@@ -207,7 +223,7 @@ const MainView: React.FC<MainViewProps> = ({ user }) => {
                 </div>
               </>
           ) : (
-              /* MODE DASHBOARD (Nouveau) */
+              /* CAS 3 : MODE DASHBOARD */
               <DashboardView
                   user={user}
                   documents={documents}
@@ -216,7 +232,6 @@ const MainView: React.FC<MainViewProps> = ({ user }) => {
               />
           )}
         </main>
-
         {/* History Modal (inchangé, gardé pour compatibilité) */}
         {showHistory && (
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4">
