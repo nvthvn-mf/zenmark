@@ -34,6 +34,19 @@ export const AuthController = {
     return user;
   },
 
+
+  async updateProfile(firstName: string, lastName: string) {
+    const { data, error } = await supabase.auth.updateUser({
+      data: {
+        first_name: firstName,
+        last_name: lastName,
+        full_name: `${firstName} ${lastName}`.trim()
+      }
+    });
+    if (error) throw error;
+    return data.user;
+  },
+
   onAuthStateChange(callback: (user: any) => void) {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       callback(session?.user ?? null);
