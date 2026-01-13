@@ -46,6 +46,12 @@ export const AuthController = {
     if (error) throw error;
     return data.user;
   },
+  async updateEmail(newEmail: string) {
+    // Supabase gère la double confirmation automatiquement
+    const { data, error } = await supabase.auth.updateUser({ email: newEmail });
+    if (error) throw error;
+    return data.user;
+  },
 
   onAuthStateChange(callback: (user: any) => void) {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
