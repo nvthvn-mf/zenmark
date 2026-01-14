@@ -98,7 +98,7 @@ const DashboardView: React.FC<DashboardViewProps> = ({ user, documents, onOpenDo
                     )}
                 </div>
 
-                {/* Quick Actions (Inspiré de ton image) */}
+                {/* Quick Actions */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="bg-indigo-900 text-white p-6 rounded-2xl flex items-center justify-between relative overflow-hidden group cursor-pointer">
                         <div className="relative z-10">

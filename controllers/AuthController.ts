@@ -2,7 +2,6 @@ import { supabase } from '../services/supabase';
 import { AuthChangeEvent, Session } from '@supabase/supabase-js';
 
 export const AuthController = {
-  // ... (Vos fonctions login, signUp, logout existantes restent identiques) ...
   async login(email: string, password: string) {
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) throw error;
@@ -36,8 +35,6 @@ export const AuthController = {
     return user;
   },
 
-  // --- NOUVEAU : Méthodes pour le profil et le reset ---
-
   async updateProfile(firstName: string, lastName: string) {
     const { data, error } = await supabase.auth.updateUser({
       data: {
@@ -63,15 +60,13 @@ export const AuthController = {
     if (error) throw error;
   },
 
-  // Cette fonction change le mot de passe SANS demander l'ancien.
-  // Elle ne fonctionne que si l'utilisateur est connecté (ce qui est le cas après le clic sur le lien).
+
   async resetPassword(newPassword: string) {
     const { data, error } = await supabase.auth.updateUser({ password: newPassword });
     if (error) throw error;
     return data.user;
   },
 
-  // Cette fonction change le mot de passe EN VÉRIFIANT l'ancien (pour le profil)
   async updatePasswordWithCheck(oldPassword: string, newPassword: string) {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user || !user.email) throw new Error("Utilisateur non identifié");
