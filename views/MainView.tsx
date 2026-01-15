@@ -8,7 +8,8 @@ import { AuthController } from '../controllers/AuthController';
 import MilkdownEditor from '../components/MilkdownEditor';
 import Icon from '../components/Icon';
 import ProfileView from './ProfileView';
-import DashboardView from './DashboardView'; // Import du nouveau dashboard
+import DashboardView from './DashboardView';
+import ExplorerView from './ExplorerView'; // <--- 1. Import de la nouvelle vue
 
 interface MainViewProps {
   user: any;
@@ -21,8 +22,10 @@ const MainView: React.FC<MainViewProps> = ({ user }) => {
   const [syncStatus, setSyncStatus] = useState<AppStatus>(AppStatus.ONLINE);
   const [showHistory, setShowHistory] = useState(false);
   const [versions, setVersions] = useState<DocumentVersion[]>([]);
+
+  // États de navigation
   const [showProfile, setShowProfile] = useState(false);
-  // État pour savoir si la sidebar est en mode "réduit" sur mobile (optionnel, gardons simple)
+  const [showExplorer, setShowExplorer] = useState(false); // <--- 2. Nouvel état pour l'explorateur
 
   const loadDocs = useCallback(async () => {
     const docs = await DocumentController.getAllDocuments(user.id);
@@ -33,7 +36,7 @@ const MainView: React.FC<MainViewProps> = ({ user }) => {
     loadDocs();
   }, [loadDocs]);
 
-  // Sync Logic (Inchangé)
+  // Sync Logic
   useEffect(() => {
     const performSync = async () => {
       setSyncStatus(AppStatus.SYNCING);
@@ -54,7 +57,8 @@ const MainView: React.FC<MainViewProps> = ({ user }) => {
   const handleCreate = async () => {
     const newDoc = await DocumentController.createDocument(user.id);
     setDocuments([newDoc, ...documents]);
-    setActiveDoc(newDoc); // Ouvre directement le nouveau doc
+    setActiveDoc(newDoc);
+    setShowExplorer(false); // On ferme l'explorateur si on crée depuis la sidebar
   };
 
   const handleUpdateContent = async (content: string) => {
@@ -113,9 +117,10 @@ const MainView: React.FC<MainViewProps> = ({ user }) => {
                 onClick={() => {
                   setActiveDoc(null);
                   setShowProfile(false);
+                  setShowExplorer(false); // Retour au Dashboard pur
                 }}
                 className={`w-full flex items-center justify-center lg:justify-start gap-3 p-3 rounded-xl transition-all ${
-                    !activeDoc ? 'bg-indigo-50 text-indigo-600 font-medium' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900'
+                    !activeDoc && !showProfile && !showExplorer ? 'bg-indigo-50 text-indigo-600 font-medium' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900'
                 }`}
             >
               <Icon name="home" size={20} />
@@ -132,25 +137,19 @@ const MainView: React.FC<MainViewProps> = ({ user }) => {
           </div>
 
           <div className="mt-4 px-3 lg:px-6">
-            <div className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 hidden lg:block">Documents</div>
+            <div className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 hidden lg:block">Documents Récents</div>
             {/* Liste simplifiée pour sidebar */}
             <div className="space-y-1 max-h-[40vh] overflow-y-auto no-scrollbar">
-              {filteredDocs.map(doc => (
+              {filteredDocs.slice(0, 10).map(doc => ( // On limite à 10 pour la sidebar
                   <div
                       key={doc.id}
-                      onClick={() => setActiveDoc(doc)}
+                      onClick={() => { setActiveDoc(doc); setShowExplorer(false); setShowProfile(false); }}
                       className={`group flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-all ${
                           activeDoc?.id === doc.id ? 'bg-indigo-50 text-indigo-700' : 'text-slate-600 hover:bg-slate-50'
                       }`}
                   >
                     <Icon name="file" size={16} className={`flex-shrink-0 ${activeDoc?.id === doc.id ? 'text-indigo-500' : 'text-slate-400'}`} />
                     <span className="hidden lg:block truncate text-sm flex-1">{doc.title || 'Sans titre'}</span>
-                    <button
-                        onClick={(e) => { e.stopPropagation(); handleDelete(doc.id); }}
-                        className="hidden lg:group-hover:block p-1 text-slate-300 hover:text-red-500"
-                    >
-                      <Icon name="trash" size={14} />
-                    </button>
                   </div>
               ))}
             </div>
@@ -164,7 +163,11 @@ const MainView: React.FC<MainViewProps> = ({ user }) => {
                 <span className="hidden lg:block text-xs text-slate-500 capitalize">{syncStatus}</span>
               </div>
 
-              <button onClick={() => { setShowProfile(true); setActiveDoc(null); }} className="text-slate-400 hover:text-slate-600 transition-colors" title="Paramètres">
+              <button
+                  onClick={() => { setShowProfile(true); setActiveDoc(null); setShowExplorer(false); }}
+                  className="text-slate-400 hover:text-slate-600 transition-colors"
+                  title="Paramètres"
+              >
                 <Icon name="settings" size={18} />
               </button>
               <button onClick={() => AuthController.logout()} className="text-slate-400 hover:text-slate-600">
@@ -174,8 +177,6 @@ const MainView: React.FC<MainViewProps> = ({ user }) => {
           </div>
         </aside>
 
-
-        {/* --- MAIN CONTENT AREA --- */}
         {/* --- MAIN CONTENT AREA --- */}
         <main className="flex-1 flex flex-col min-w-0 bg-slate-50 relative">
 
@@ -185,8 +186,19 @@ const MainView: React.FC<MainViewProps> = ({ user }) => {
                   user={user}
                   onBack={() => setShowProfile(false)}
               />
+          ) : showExplorer ? (
+              /* CAS 2 : MODE EXPLORATEUR (Nouveau) */
+              <ExplorerView
+                  user={user}
+                  documents={documents}
+                  onOpenDocument={(doc) => {
+                    setActiveDoc(doc);
+                    setShowExplorer(false); // On ferme l'explorateur quand on ouvre un doc
+                  }}
+                  onBack={() => setShowExplorer(false)}
+              />
           ) : activeDoc ? (
-              /* CAS 2 : MODE ÉDITEUR */
+              /* CAS 3 : MODE ÉDITEUR */
               <>
                 <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-6 sticky top-0 z-20">
                   <div className="flex-1 mr-4">
@@ -223,16 +235,18 @@ const MainView: React.FC<MainViewProps> = ({ user }) => {
                 </div>
               </>
           ) : (
-              /* CAS 3 : MODE DASHBOARD */
+              /* CAS 4 : MODE DASHBOARD */
               <DashboardView
                   user={user}
                   documents={documents}
                   onOpenDocument={setActiveDoc}
                   onCreateDocument={handleCreate}
+                  onShowExplorer={() => setShowExplorer(true)} // Déclencheur Explorateur
               />
           )}
         </main>
-        {/* History Modal (inchangé, gardé pour compatibilité) */}
+
+        {/* History Modal */}
         {showHistory && (
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4">
               <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden flex flex-col max-h-[80vh]">
