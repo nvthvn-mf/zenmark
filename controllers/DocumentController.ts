@@ -58,6 +58,14 @@ export const DocumentController = {
       .reverse()
       .sortBy('updatedAt');
   },
+  async moveDocument(documentId: string, folderId: string | null): Promise<void> {
+    const { error } = await supabase
+        .from('documents')
+        .update({ folder_id: folderId }) // folderId peut être null (retour racine)
+        .eq('id', documentId);
+
+    if (error) throw error;
+  },
 
   async loadDocument(id: string): Promise<Document | undefined> {
     return await db.documents.get(id);
