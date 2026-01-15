@@ -5,16 +5,23 @@ export interface UserSettings {
   exportTemplate: string;
 }
 
+export interface Folder {
+  id: string;
+  user_id: string;
+  parent_id: string | null; // null = à la racine
+  name: string;
+  createdAt: number;
+  is_deleted?: boolean;
+}
+
 export interface Document {
   id: string;
   title: string;
   content: string;
-  createdAt: number;
   updatedAt: number;
-  currentVersion: number;
-  tags: string[];
-  isDeleted: boolean;
-  userId: string;
+  tags?: string[];
+  is_deleted?: boolean;
+  folder_id?: string | null; // NOUVEAU : null = racine
 }
 
 export interface DocumentVersion {
