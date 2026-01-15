@@ -7,9 +7,10 @@ interface DashboardViewProps {
     documents: Document[];
     onOpenDocument: (doc: Document) => void;
     onCreateDocument: () => void;
+    onShowExplorer: () => void;
 }
 
-const DashboardView: React.FC<DashboardViewProps> = ({ user, documents, onOpenDocument, onCreateDocument }) => {
+const DashboardView: React.FC<DashboardViewProps> = ({ user, documents, onOpenDocument, onCreateDocument, onShowExplorer }) => {
     // On prend les 6 derniers documents modifiés
     const recentDocs = documents.slice(0, 6);
 
@@ -56,7 +57,10 @@ const DashboardView: React.FC<DashboardViewProps> = ({ user, documents, onOpenDo
                             <Icon name="clock" className="text-indigo-500" />
                             Modifiés récemment
                         </h2>
-                        <button className="text-sm text-slate-500 hover:text-indigo-600 font-medium transition-colors">
+                        <button
+                            onClick={onShowExplorer}
+                            className="text-sm text-slate-500 hover:text-indigo-600 font-medium transition-colors"
+                        >
                             Voir tout
                         </button>
                     </div>
