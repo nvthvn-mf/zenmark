@@ -3,6 +3,7 @@ import { db } from '../services/db';
 import { Document } from '../types';
 import { v4 as uuidv4 } from 'uuid';
 import { VersionController } from './VersionController';
+import {supabase} from "@/services/supabase.ts";
 
 export const DocumentController = {
   async createDocument(userId: string, title: string = 'Untitled'): Promise<Document> {
@@ -50,13 +51,27 @@ export const DocumentController = {
     await db.syncState.update(id, { status: 'pending' });
   },
 
+  // Modifiez la méthode getAllDocuments existante
   async getAllDocuments(userId: string): Promise<Document[]> {
-    return await db.documents
-      .where('userId')
-      .equals(userId)
-      .and(doc => !doc.isDeleted)
-      .reverse()
-      .sortBy('updatedAt');
+    const { data, error } = await supabase
+        .from('documents')
+        .select('*')
+        .eq('user_id', userId)
+        .eq('is_deleted', false)
+        .order('updated_at', { ascending: false });
+
+    if (error) {
+      console.error('Error fetching documents:', error);
+      return [];
+    }
+
+    // Mapping pour convertir le snake_case (SQL) en camelCase (TS) si besoin
+    // Notre interface utilise updatedAt mais la base updated_at, on s'assure de mapper correctement
+    return data.map((doc: any) => ({
+      ...doc,
+      updatedAt: doc.updated_at,
+      folder_id: doc.folder_id // On s'assure de bien le récupérer
+    }));
   },
   async moveDocument(documentId: string, folderId: string | null): Promise<void> {
     const { error } = await supabase
