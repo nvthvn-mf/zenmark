@@ -1,27 +1,32 @@
+// zenmark/types.ts
 
-export interface UserSettings {
-  theme: 'light' | 'dark';
-  autosaveDelay: number;
-  exportTemplate: string;
+export interface Document {
+  id: string;
+  userId: string;          // AJOUTÉ (Manquait)
+  title: string;
+  content: string;
+  createdAt: number;       // AJOUTÉ (Manquait)
+  updatedAt: number;
+  currentVersion: number;  // AJOUTÉ (Manquait)
+  tags?: string[];
+  isDeleted?: boolean;     // RENOMMÉ (était is_deleted) pour correspondre à votre Controller
+  folderId?: string | null; // RENOMMÉ (était folder_id) pour uniformiser
 }
 
+// ... Les autres interfaces (Folder, DocumentVersion, etc.) restent inchangées
 export interface Folder {
   id: string;
   user_id: string;
-  parent_id: string | null; // null = à la racine
+  parent_id: string | null;
   name: string;
   createdAt: number;
   is_deleted?: boolean;
 }
 
-export interface Document {
-  id: string;
-  title: string;
-  content: string;
-  updatedAt: number;
-  tags?: string[];
-  is_deleted?: boolean;
-  folder_id?: string | null; // NOUVEAU : null = racine
+export interface UserSettings {
+  theme: 'light' | 'dark';
+  autosaveDelay: number;
+  exportTemplate: string;
 }
 
 export interface DocumentVersion {
@@ -43,9 +48,4 @@ export enum AppStatus {
   ONLINE = 'online',
   OFFLINE = 'offline',
   SYNCING = 'syncing'
-}
-
-export interface AuthState {
-  user: any | null;
-  loading: boolean;
 }

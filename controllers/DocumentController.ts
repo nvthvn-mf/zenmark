@@ -1,15 +1,18 @@
+// zenmark/controllers/DocumentController.ts
 
 import { db } from '../services/db';
 import { Document } from '../types';
 import { v4 as uuidv4 } from 'uuid';
 import { VersionController } from './VersionController';
-import {supabase} from "@/services/supabase.ts";
+import { supabase } from '../services/supabase'; // Attention au chemin d'import (../ vs @/)
 
 export const DocumentController = {
   async createDocument(userId: string, title: string = 'Untitled'): Promise<Document> {
     const now = Date.now();
+    // Maintenant, ceci correspond parfaitement à l'interface Document corrigée
     const doc: Document = {
       id: uuidv4(),
+      userId,
       title,
       content: '',
       createdAt: now,
@@ -17,13 +20,12 @@ export const DocumentController = {
       currentVersion: 1,
       tags: [],
       isDeleted: false,
-      userId
+      folderId: null // Initialisé à null (racine)
     };
 
     await db.documents.add(doc);
     await VersionController.createVersion(doc.id, doc.content, 1);
-    
-    // Mark for sync
+
     await db.syncState.put({
       documentId: doc.id,
       lastSyncedAt: 0,
@@ -41,17 +43,16 @@ export const DocumentController = {
     const updatedDoc = { ...existing, ...updates, updatedAt };
 
     await db.documents.update(id, updatedDoc);
-
-    // Update sync status
     await db.syncState.update(id, { status: 'pending' });
   },
 
   async deleteDocument(id: string): Promise<void> {
+    // isDeleted est maintenant reconnu
     await db.documents.update(id, { isDeleted: true, updatedAt: Date.now() });
     await db.syncState.update(id, { status: 'pending' });
   },
 
-  // Modifiez la méthode getAllDocuments existante
+  // --- C'est ici que la magie du Mapping opère ---
   async getAllDocuments(userId: string): Promise<Document[]> {
     const { data, error } = await supabase
         .from('documents')
@@ -65,21 +66,33 @@ export const DocumentController = {
       return [];
     }
 
-    // Mapping pour convertir le snake_case (SQL) en camelCase (TS) si besoin
-    // Notre interface utilise updatedAt mais la base updated_at, on s'assure de mapper correctement
+    // Mapping SQL (snake_case) vers App (camelCase)
+    // C'est indispensable car Supabase renvoie 'created_at' mais votre app veut 'createdAt'
     return data.map((doc: any) => ({
-      ...doc,
-      updatedAt: doc.updated_at,
-      folder_id: doc.folder_id // On s'assure de bien le récupérer
+      id: doc.id,
+      userId: doc.user_id,
+      title: doc.title,
+      content: doc.content,
+      createdAt: doc.created_at,        // Mapping
+      updatedAt: doc.updated_at,        // Mapping
+      currentVersion: doc.current_version, // Mapping
+      tags: doc.tags,
+      isDeleted: doc.is_deleted,        // Mapping
+      folderId: doc.folder_id           // Mapping
     }));
   },
+
   async moveDocument(documentId: string, folderId: string | null): Promise<void> {
+    // Note : Dans la base SQL la colonne est 'folder_id', mais l'argument JS est 'folderId'
     const { error } = await supabase
         .from('documents')
-        .update({ folder_id: folderId }) // folderId peut être null (retour racine)
+        .update({ folder_id: folderId })
         .eq('id', documentId);
 
     if (error) throw error;
+
+    // IMPORTANT : Mettre à jour aussi le local (IndexedDB) pour que l'UI change instantanément
+    await db.documents.update(documentId, { folderId: folderId });
   },
 
   async loadDocument(id: string): Promise<Document | undefined> {
