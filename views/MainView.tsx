@@ -9,7 +9,7 @@ import MilkdownEditor from '../components/MilkdownEditor';
 import Icon from '../components/Icon';
 import ProfileView from './ProfileView';
 import DashboardView from './DashboardView';
-import ExplorerView from './ExplorerView'; // <--- 1. Import de la nouvelle vue
+import ExplorerView from './ExplorerView';
 
 interface MainViewProps {
   user: any;
