@@ -90,7 +90,7 @@ const ProfileView: React.FC<ProfileViewProps> = ({ user, onBack }) => {
 
         setLoading(true);
         try {
-            await AuthController.updatePassword(oldPassword, password);
+            await AuthController.updatePasswordWithCheck(oldPassword, password);
             showMessage('success', 'Mot de passe modifié avec succès !');
             // Reset des champs
             setOldPassword('');
