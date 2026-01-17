@@ -19,3 +19,25 @@
       Recommandation : Pour une V1 fiable, je recommande l'Option B (Menu + Modal). C'est plus simple à coder et fonctionne parfaitement sur mobile.
       Verdict : 🟠 Moyenne. La logique BDD est simple, mais créer une interface de sélection de dossier (Modal) demande un peu de travail UI.
 
+3. Feat à ajouter : CRUD complet dans l'Explorateur
+   Le besoin : Renommer, Supprimer, Créer (fichiers/dossiers) directement depuis la vue ExplorerView.
+   Analyse par action :
+* A. Création de fichier dans un dossier
+    * Actuel : createDocument crée toujours à la racine ou ne prend pas d'argument dossier.
+    * Modification : Il faut modifier DocumentController.createDocument pour accepter un paramètre optionnel folderId.
+    * UI : Ajouter un bouton "Nouveau Fichier" dans la barre d'outils de l'explorateur qui utilise l'ID du dossier courant.
+* B. Renommage (Fichiers & Dossiers)
+    * Backend : renameFolder existe déjà. updateDocument (pour changer le titre) existe déjà.
+    * UI : Le défi est l'interface. Deux écoles :
+        1. Inline editing : Le texte devient un champ input quand on double-clique (style Windows/Mac). Complexe à gérer en React.
+        2. Modal/Prompt : Un bouton "Renommer", une popup demande le nouveau nom. Plus simple.
+* C. Suppression (Dossiers)
+    * Backend : deleteFolder existe (soft delete).
+    * Sécurité : Si on supprime un dossier, que deviennent les fichiers dedans ?
+        * Option 1 : On interdit de supprimer un dossier non vide.
+        * Option 2 (Recommandée) : Suppression en cascade (si je supprime le dossier "Projet", tout son contenu est marqué is_deleted aussi). Cela demande une petite logique supplémentaire côté SQL ou Controller.
+* L'Interface Globale (Menu Contextuel)
+    * Pour ne pas surcharger l'interface avec 50 boutons par fichier, la solution standard est un Menu Contextuel (bouton "..." sur chaque carte).
+    * Ce menu contiendra : Ouvrir, Renommer, Déplacer, Supprimer.
+      Verdict : 🟠 Moyenne. Beaucoup de petites logiques à connecter. La création du composant "Menu Contextuel" (Dropdown) sera la clé pour rendre ça propre.
+
