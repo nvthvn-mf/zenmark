@@ -41,3 +41,9 @@
     * Ce menu contiendra : Ouvrir, Renommer, Déplacer, Supprimer.
       Verdict : 🟠 Moyenne. Beaucoup de petites logiques à connecter. La création du composant "Menu Contextuel" (Dropdown) sera la clé pour rendre ça propre.
 
+Résumé du Plan d'Action
+Si cette étude vous convient, voici l'ordre logique d'implémentation pour la suite :
+1. Vite fait, bien fait : Corriger la suppression dans le Dashboard (Feat 1).
+2. Mise à niveau du Controller : Modifier createDocument pour accepter un folderId (Feat 3A).
+3. UI - Menu Contextuel : Créer un petit composant "Menu (3 points)" pour chaque fichier/dossier dans l'explorateur. C'est ce menu qui déclenchera Renommer/Supprimer/Déplacer.
+
