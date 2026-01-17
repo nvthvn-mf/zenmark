@@ -21,6 +21,7 @@ const ProfileView: React.FC<ProfileViewProps> = ({ user, onBack }) => {
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
 
+    // --- Etats ---
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState({ type: '', text: '' });
 
