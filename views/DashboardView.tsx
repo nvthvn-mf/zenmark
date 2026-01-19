@@ -1,7 +1,6 @@
 import React from 'react';
 import { Document } from '../types';
 import Icon from '../components/Icon';
-import { DocumentController } from '../controllers/DocumentController';
 
 interface DashboardViewProps {
     user: any;
@@ -9,6 +8,7 @@ interface DashboardViewProps {
     onOpenDocument: (doc: Document) => void;
     onCreateDocument: () => void;
     onShowExplorer: () => void;
+    onDeleteDocument: (id: string) => void;
 }
 
 const DashboardView: React.FC<DashboardViewProps> = ({
@@ -16,7 +16,8 @@ const DashboardView: React.FC<DashboardViewProps> = ({
                                                          documents,
                                                          onOpenDocument,
                                                          onCreateDocument,
-                                                         onShowExplorer
+                                                         onShowExplorer,
+                                                         onDeleteDocument
                                                      }) => {
 
     // On ne prend que les 5 derniers documents modifiés pour l'aperçu
@@ -24,11 +25,10 @@ const DashboardView: React.FC<DashboardViewProps> = ({
         .filter(d => !d.isDeleted)
         .slice(0, 5);
 
-    const handleDelete = async (e: React.MouseEvent, id: string) => {
-        e.stopPropagation(); // Empêche l'ouverture du document
-        if (confirm('Supprimer ce document ?')) {
-            await DocumentController.deleteDocument(id);
-        }
+    // 3. Nouvelle fonction simplifiée
+    const handleDeleteClick = (e: React.MouseEvent, id: string) => {
+        e.stopPropagation(); // On empêche toujours l'ouverture du doc
+        onDeleteDocument(id); // On appelle la fonction du parent (qui gère la confirm et le state)
     };
 
     return (
@@ -94,7 +94,7 @@ const DashboardView: React.FC<DashboardViewProps> = ({
                                 >
                                     {/* Bouton de suppression */}
                                     <button
-                                        onClick={(e) => handleDelete(e, doc.id)}
+                                        onClick={(e) => handleDeleteClick(e, doc.id)}
                                         className="absolute top-3 right-3 p-2 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-lg opacity-0 group-hover:opacity-100 transition-all"
                                         title="Supprimer"
                                     >

@@ -242,6 +242,7 @@ const MainView: React.FC<MainViewProps> = ({ user }) => {
                   onOpenDocument={setActiveDoc}
                   onCreateDocument={handleCreate}
                   onShowExplorer={() => setShowExplorer(true)} // Déclencheur Explorateur
+                  onDeleteDocument={handleDelete} // Declencheur de mise à jour des fichiers
               />
           )}
         </main>
