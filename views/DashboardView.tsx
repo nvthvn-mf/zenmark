@@ -1,6 +1,7 @@
 import React from 'react';
 import { Document } from '../types';
 import Icon from '../components/Icon';
+import { DocumentController } from '../controllers/DocumentController';
 
 interface DashboardViewProps {
     user: any;
@@ -10,53 +11,71 @@ interface DashboardViewProps {
     onShowExplorer: () => void;
 }
 
-const DashboardView: React.FC<DashboardViewProps> = ({ user, documents, onOpenDocument, onCreateDocument, onShowExplorer }) => {
-    // On prend les 6 derniers documents modifiés
-    const recentDocs = documents.slice(0, 6);
+const DashboardView: React.FC<DashboardViewProps> = ({
+                                                         user,
+                                                         documents,
+                                                         onOpenDocument,
+                                                         onCreateDocument,
+                                                         onShowExplorer
+                                                     }) => {
 
-    // Petit helper pour extraire un aperçu du texte sans le markdown
-    const getPreview = (content: string) => {
-        return content.replace(/[#*`_]/g, '').substring(0, 100) + (content.length > 100 ? '...' : '');
+    // On ne prend que les 5 derniers documents modifiés pour l'aperçu
+    const recentDocs = documents
+        .filter(d => !d.isDeleted)
+        .slice(0, 5);
+
+    const handleDelete = async (e: React.MouseEvent, id: string) => {
+        e.stopPropagation(); // Empêche l'ouverture du document
+        if (confirm('Supprimer ce document ?')) {
+            await DocumentController.deleteDocument(id);
+        }
     };
 
-    // Salutation dynamique
-    const hour = new Date().getHours();
-    const greeting = hour < 12 ? 'Bonjour' : hour < 18 ? 'Bon après-midi' : 'Bonsoir';
-
     return (
-        <div className="flex-1 h-full overflow-y-auto bg-slate-50 p-8 md:p-12">
-            <div className="max-w-5xl mx-auto space-y-12">
+        <div className="flex-1 p-8 overflow-y-auto bg-slate-50">
+            <div className="max-w-5xl mx-auto">
 
-                {/* Header / Banner */}
-                <div className="relative bg-white rounded-3xl p-8 shadow-sm border border-slate-100 overflow-hidden">
-                    <div className="relative z-10">
-                        <h1 className="text-3xl font-bold text-slate-800 mb-2">
-                            {greeting}, {user?.user_metadata?.first_name || user?.email?.split('@')[0]} 👋                        </h1>
-                        <p className="text-slate-500 text-lg max-w-lg">
-                            Prêt à capturer vos idées ? Vous avez {documents.length} document{documents.length > 1 ? 's' : ''} dans votre espace.
-                        </p>
+                {/* Header Bienvenue */}
+                <header className="mb-10">
+                    <h1 className="text-3xl font-bold text-slate-900">
+                        Bonjour, {user?.user_metadata?.first_name || 'utilisateur'} 👋
+                    </h1>
+                    <p className="text-slate-500 mt-2">Prêt à organiser vos idées aujourd'hui ?</p>
+                </header>
 
-                        <button
-                            onClick={onCreateDocument}
-                            className="mt-6 flex items-center gap-2 px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-medium shadow-lg shadow-indigo-200 transition-all hover:scale-105 active:scale-95"
-                        >
-                            <Icon name="plus" size={20} />
-                            Nouveau Document
-                        </button>
-                    </div>
+                {/* Section Actions Principales */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-12">
+                    <button
+                        onClick={onCreateDocument}
+                        className="flex items-center gap-4 p-6 bg-indigo-600 rounded-2xl text-white hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-200 group"
+                    >
+                        <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
+                            <Icon name="plus" size={24} />
+                        </div>
+                        <div className="text-left">
+                            <div className="font-bold text-lg">Nouveau Document</div>
+                            <div className="text-indigo-100 text-sm">Commencez à écrire en Markdown</div>
+                        </div>
+                    </button>
 
-                    {/* Décoration d'arrière-plan abstraite */}
-                    <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-50 rounded-full blur-3xl -translate-y-1/2 translate-x-1/4 opacity-60" />
-                    <div className="absolute bottom-0 right-20 w-40 h-40 bg-purple-50 rounded-full blur-2xl translate-y-1/3 opacity-60" />
+                    <button
+                        onClick={onShowExplorer}
+                        className="flex items-center gap-4 p-6 bg-white border border-slate-200 rounded-2xl text-slate-700 hover:border-indigo-300 transition-all group"
+                    >
+                        <div className="w-12 h-12 bg-slate-100 rounded-xl flex items-center justify-center group-hover:bg-indigo-50 group-hover:text-indigo-600 transition-colors">
+                            <Icon name="grid" size={24} />
+                        </div>
+                        <div className="text-left">
+                            <div className="font-bold text-lg">Mes Dossiers</div>
+                            <div className="text-slate-400 text-sm">Explorez votre bibliothèque</div>
+                        </div>
+                    </button>
                 </div>
 
                 {/* Section Récents */}
-                <div>
+                <section className="mb-12">
                     <div className="flex items-center justify-between mb-6">
-                        <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2">
-                            <Icon name="clock" className="text-indigo-500" />
-                            Modifiés récemment
-                        </h2>
+                        <h2 className="text-xl font-bold text-slate-800">Documents récents</h2>
                         <button
                             onClick={onShowExplorer}
                             className="text-sm text-slate-500 hover:text-indigo-600 font-medium transition-colors"
@@ -65,50 +84,48 @@ const DashboardView: React.FC<DashboardViewProps> = ({ user, documents, onOpenDo
                         </button>
                     </div>
 
-                    {recentDocs.length > 0 ? (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            {recentDocs.map(doc => (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {recentDocs.length > 0 ? (
+                            recentDocs.map(doc => (
                                 <div
                                     key={doc.id}
                                     onClick={() => onOpenDocument(doc)}
-                                    className="group bg-white p-6 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md hover:border-indigo-100 transition-all cursor-pointer flex flex-col h-48"
+                                    className="group bg-white p-5 rounded-xl border border-slate-200 hover:border-indigo-300 hover:shadow-md transition-all cursor-pointer relative"
                                 >
-                                    <div className="flex items-start justify-between mb-3">
-                                        <div className="p-2 bg-indigo-50 text-indigo-600 rounded-lg group-hover:bg-indigo-600 group-hover:text-white transition-colors">
-                                            <Icon name="file" size={20} />
-                                        </div>
-                                        <span className="text-xs text-slate-400">
-                      {new Date(doc.updatedAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
-                    </span>
+                                    {/* Bouton de suppression */}
+                                    <button
+                                        onClick={(e) => handleDelete(e, doc.id)}
+                                        className="absolute top-3 right-3 p-2 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-lg opacity-0 group-hover:opacity-100 transition-all"
+                                        title="Supprimer"
+                                    >
+                                        <Icon name="trash" size={16} />
+                                    </button>
+
+                                    <div className="w-10 h-10 bg-slate-100 rounded-lg flex items-center justify-center text-slate-500 mb-4 group-hover:bg-indigo-50 group-hover:text-indigo-600 transition-colors">
+                                        <Icon name="file" size={20} />
                                     </div>
-
-                                    <h3 className="font-bold text-slate-800 mb-2 truncate pr-4">
-                                        {doc.title || 'Sans titre'}
-                                    </h3>
-
-                                    <p className="text-sm text-slate-500 line-clamp-3 flex-1">
-                                        {doc.content ? getPreview(doc.content) : <span className="italic opacity-50">Vide...</span>}
+                                    <h3 className="font-bold text-slate-800 truncate mb-1 pr-8">{doc.title || 'Sans titre'}</h3>
+                                    <p className="text-xs text-slate-400">
+                                        Modifié le {new Date(doc.updatedAt).toLocaleDateString()}
                                     </p>
                                 </div>
-                            ))}
-                        </div>
-                    ) : (
-                        <div className="text-center py-20 bg-white rounded-3xl border border-dashed border-slate-200">
-                            <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4 text-slate-400">
-                                <Icon name="file" size={24} />
+                            ))
+                        ) : (
+                            <div className="col-span-full py-12 text-center bg-white rounded-2xl border border-dashed border-slate-300">
+                                <p className="text-slate-400">Aucun document récent.</p>
                             </div>
-                            <p className="text-slate-500">Aucun document pour le moment.</p>
-                        </div>
-                    )}
-                </div>
+                        )}
+                    </div>
+                </section>
 
-                {/* Quick Actions */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Pied de page (Restauré) */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pb-8">
                     <div className="bg-indigo-900 text-white p-6 rounded-2xl flex items-center justify-between relative overflow-hidden group cursor-pointer">
                         <div className="relative z-10">
                             <h3 className="font-bold text-lg mb-1">Guide de démarrage</h3>
                             <p className="text-indigo-200 text-sm">Apprenez les bases du Markdown</p>
                         </div>
+                        {/* Note: Assurez-vous que l'icône 'more' existe dans Icon.tsx, sinon utilisez 'help-circle' */}
                         <Icon name="more" className="relative z-10 opacity-50 group-hover:opacity-100 transition-opacity" />
                         <div className="absolute right-0 top-0 w-32 h-32 bg-white opacity-5 rounded-full blur-2xl transform translate-x-10 -translate-y-10" />
                     </div>
