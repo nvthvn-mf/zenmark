@@ -25,7 +25,7 @@ const MainView: React.FC<MainViewProps> = ({ user }) => {
 
   // États de navigation
   const [showProfile, setShowProfile] = useState(false);
-  const [showExplorer, setShowExplorer] = useState(false); // <--- 2. Nouvel état pour l'explorateur
+  const [showExplorer, setShowExplorer] = useState(false);
 
   const loadDocs = useCallback(async () => {
     const docs = await DocumentController.getAllDocuments(user.id);
@@ -54,11 +54,12 @@ const MainView: React.FC<MainViewProps> = ({ user }) => {
     return () => clearInterval(interval);
   }, [user.id, loadDocs]);
 
+  // Gestionnaire de création (accepte un dossier ou null pour la racine)
   const handleCreate = async (folderId: string | null = null) => {
     const newDoc = await DocumentController.createDocument(user.id, 'Sans titre', folderId);
     setDocuments([newDoc, ...documents]);
     setActiveDoc(newDoc);
-    setShowExplorer(false); // On ferme l'explorateur pour passer en mode édition
+    setShowExplorer(false);
   };
 
   const handleUpdateContent = async (content: string) => {
@@ -73,7 +74,7 @@ const MainView: React.FC<MainViewProps> = ({ user }) => {
   const handleDelete = async (id: string) => {
     if (!confirm('Êtes-vous sûr de vouloir supprimer ce document ?')) return;
     await DocumentController.deleteDocument(id);
-    setDocuments(prev => prev.filter(d => d.id !== id)); // C'est CETTE ligne qui met à jour l'interface !
+    setDocuments(prev => prev.filter(d => d.id !== id));
     if (activeDoc?.id === id) setActiveDoc(null);
   };
 
@@ -117,7 +118,7 @@ const MainView: React.FC<MainViewProps> = ({ user }) => {
                 onClick={() => {
                   setActiveDoc(null);
                   setShowProfile(false);
-                  setShowExplorer(false); // Retour au Dashboard pur
+                  setShowExplorer(false);
                 }}
                 className={`w-full flex items-center justify-center lg:justify-start gap-3 p-3 rounded-xl transition-all ${
                     !activeDoc && !showProfile && !showExplorer ? 'bg-indigo-50 text-indigo-600 font-medium' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900'
@@ -128,7 +129,8 @@ const MainView: React.FC<MainViewProps> = ({ user }) => {
             </button>
 
             <button
-                onClick={handleCreate}
+                // CORRECTION 1 : On appelle la fonction en lui passant explicitement null (racine)
+                onClick={() => handleCreate(null)}
                 className="w-full flex items-center justify-center lg:justify-start gap-3 p-3 rounded-xl text-slate-500 hover:bg-slate-50 hover:text-slate-900 transition-all"
             >
               <Icon name="plus" size={20} />
@@ -138,9 +140,8 @@ const MainView: React.FC<MainViewProps> = ({ user }) => {
 
           <div className="mt-4 px-3 lg:px-6">
             <div className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 hidden lg:block">Documents Récents</div>
-            {/* Liste simplifiée pour sidebar */}
             <div className="space-y-1 max-h-[40vh] overflow-y-auto no-scrollbar">
-              {filteredDocs.slice(0, 10).map(doc => ( // On limite à 10 pour la sidebar
+              {filteredDocs.slice(0, 10).map(doc => (
                   <div
                       key={doc.id}
                       onClick={() => { setActiveDoc(doc); setShowExplorer(false); setShowProfile(false); }}
@@ -181,25 +182,20 @@ const MainView: React.FC<MainViewProps> = ({ user }) => {
         <main className="flex-1 flex flex-col min-w-0 bg-slate-50 relative">
 
           {showProfile ? (
-              /* CAS 1 : MODE PROFIL */
-              <ProfileView
-                  user={user}
-                  onBack={() => setShowProfile(false)}
-              />
+              <ProfileView user={user} onBack={() => setShowProfile(false)} />
           ) : showExplorer ? (
-              /* CAS 2 : MODE EXPLORATEUR (Nouveau) */
+              // CORRECTION 2 : onCreateDocument est bien une prop maintenant
               <ExplorerView
                   user={user}
                   documents={documents}
                   onOpenDocument={(doc) => {
                     setActiveDoc(doc);
-                    setShowExplorer(false); // On ferme l'explorateur quand on ouvre un doc
-                    onCreateDocument={handleCreate}
+                    setShowExplorer(false);
                   }}
                   onBack={() => setShowExplorer(false)}
+                  onCreateDocument={handleCreate}
               />
           ) : activeDoc ? (
-              /* CAS 3 : MODE ÉDITEUR */
               <>
                 <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-6 sticky top-0 z-20">
                   <div className="flex-1 mr-4">
@@ -236,14 +232,13 @@ const MainView: React.FC<MainViewProps> = ({ user }) => {
                 </div>
               </>
           ) : (
-              /* CAS 4 : MODE DASHBOARD */
               <DashboardView
                   user={user}
                   documents={documents}
                   onOpenDocument={setActiveDoc}
-                  onCreateDocument={handleCreate}
-                  onShowExplorer={() => setShowExplorer(true)} // Déclencheur Explorateur
-                  onDeleteDocument={handleDelete} // Declencheur de mise à jour des fichiers
+                  onCreateDocument={() => handleCreate(null)} // On passe aussi une fonction explicite ici
+                  onShowExplorer={() => setShowExplorer(true)}
+                  onDeleteDocument={handleDelete}
               />
           )}
         </main>
