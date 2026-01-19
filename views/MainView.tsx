@@ -71,9 +71,9 @@ const MainView: React.FC<MainViewProps> = ({ user }) => {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this document?')) return;
+    if (!confirm('Êtes-vous sûr de vouloir supprimer ce document ?')) return;
     await DocumentController.deleteDocument(id);
-    setDocuments(prev => prev.filter(d => d.id !== id));
+    setDocuments(prev => prev.filter(d => d.id !== id)); // C'est CETTE ligne qui met à jour l'interface !
     if (activeDoc?.id === id) setActiveDoc(null);
   };
 
