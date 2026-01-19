@@ -54,11 +54,11 @@ const MainView: React.FC<MainViewProps> = ({ user }) => {
     return () => clearInterval(interval);
   }, [user.id, loadDocs]);
 
-  const handleCreate = async () => {
-    const newDoc = await DocumentController.createDocument(user.id);
+  const handleCreate = async (folderId: string | null = null) => {
+    const newDoc = await DocumentController.createDocument(user.id, 'Sans titre', folderId);
     setDocuments([newDoc, ...documents]);
     setActiveDoc(newDoc);
-    setShowExplorer(false); // On ferme l'explorateur si on crée depuis la sidebar
+    setShowExplorer(false); // On ferme l'explorateur pour passer en mode édition
   };
 
   const handleUpdateContent = async (content: string) => {
@@ -194,6 +194,7 @@ const MainView: React.FC<MainViewProps> = ({ user }) => {
                   onOpenDocument={(doc) => {
                     setActiveDoc(doc);
                     setShowExplorer(false); // On ferme l'explorateur quand on ouvre un doc
+                    onCreateDocument={handleCreate}
                   }}
                   onBack={() => setShowExplorer(false)}
               />
