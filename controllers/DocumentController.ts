@@ -7,9 +7,8 @@ import { VersionController } from './VersionController';
 import { supabase } from '../services/supabase'; // Attention au chemin d'import (../ vs @/)
 
 export const DocumentController = {
-  async createDocument(userId: string, title: string = 'Untitled'): Promise<Document> {
+  async createDocument(userId: string, title: string = 'Untitled', folderId: string | null = null ): Promise<Document> {
     const now = Date.now();
-    // Maintenant, ceci correspond parfaitement à l'interface Document corrigée
     const doc: Document = {
       id: uuidv4(),
       userId,
@@ -20,7 +19,7 @@ export const DocumentController = {
       currentVersion: 1,
       tags: [],
       isDeleted: false,
-      folderId: null // Initialisé à null (racine)
+      folderId: folderId // Initialisé à null (racine)
     };
 
     await db.documents.add(doc);
