@@ -14,6 +14,7 @@ interface ExplorerViewProps {
     onCreateDocument: (folderId: string | null) => void;
     onRenameDocument: (id: string, newName: string) => void;
     onDeleteDocument: (id: string) => void;
+    onMoveDocument: (id: string, targetFolderId: string | null) => void;
 }
 
 const ExplorerView: React.FC<ExplorerViewProps> = ({
@@ -23,7 +24,8 @@ const ExplorerView: React.FC<ExplorerViewProps> = ({
                                                        onBack,
                                                        onCreateDocument,
                                                        onRenameDocument,
-                                                       onDeleteDocument
+                                                       onDeleteDocument,
+                                                       onMoveDocument
                                                    }) => {
     // Navigation & Data
     const [currentPath, setCurrentPath] = useState<Folder[]>([]);
@@ -69,32 +71,27 @@ const ExplorerView: React.FC<ExplorerViewProps> = ({
         setActiveMenuId(null); // On ferme le menu contextuel
     };
 
-    // Déclenché quand on choisit une destination dans la Modale
+    // --- CORRECTION DE LA LOGIQUE DE CONFIRMATION ---
     const handleMoveConfirm = async (targetFolderId: string | null) => {
         if (!itemToMove) return;
 
         try {
             if (itemToMove.type === 'file') {
-                // 1. Déplacer un fichier
-                await DocumentController.moveDocument(itemToMove.id, targetFolderId);
-                // Note : Pas besoin de recharger docs, MainView le gère via props ou un refresh global serait idéal
-                // Pour l'instant on compte sur le fait que MainView ne voit pas le changement de folderId en temps réel sans refresh
-                // Astuce : On force un petit reload visuel local si besoin, mais le mieux est que MainView mette à jour la liste.
-                // Comme moveDocument met à jour la DB locale, un petit délai ou callback serait bien.
-                // Ici, simple alert de succès ou rien.
+                // 1. Déplacer un fichier : On utilise la fonction du parent
+                // Cela mettra à jour l'état documents dans MainView, et donc currentDocs ici
+                await onMoveDocument(itemToMove.id, targetFolderId);
             } else {
-                // 2. Déplacer un dossier
+                // 2. Déplacer un dossier : On garde le comportement local (recharge dossiers)
                 await FolderController.moveFolder(itemToMove.id, targetFolderId);
-                await loadFolders(); // On recharge la structure des dossiers
+                await loadFolders();
             }
         } catch (err) {
             alert("Erreur lors du déplacement");
             console.error(err);
         } finally {
-            setItemToMove(null); // On ferme la modale
+            setItemToMove(null);
         }
     };
-
 
     // --- GESTION DOSSIERS ---
 
