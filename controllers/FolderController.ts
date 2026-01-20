@@ -55,5 +55,21 @@ export const FolderController = {
             .eq('id', folderId);
 
         if (error) throw error;
+    },
+    // AJOUT : Déplacer un dossier
+    async moveFolder(folderId: string, targetFolderId: string | null): Promise<void> {
+        // targetFolderId peut être null (déplacer vers la racine)
+
+        // Sécurité simple : on ne peut pas se déplacer sur soi-même
+        if (folderId === targetFolderId) return;
+
+        const { error } = await supabase
+            .from('folders')
+            .update({ parent_id: targetFolderId })
+            .eq('id', folderId);
+
+        if (error) throw error;
     }
+
+
 };
