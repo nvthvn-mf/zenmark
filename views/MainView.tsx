@@ -86,6 +86,21 @@ const MainView: React.FC<MainViewProps> = ({ user }) => {
     if (activeDoc?.id === id) setActiveDoc({ ...activeDoc, title: newTitle });
   };
 
+  const handleMove = async (docId: string, targetFolderId: string | null) => {
+    // Update DB
+    await DocumentController.moveDocument(docId, targetFolderId);
+
+    // Update UI State (C'est la clé !)
+    setDocuments(prev => prev.map(d =>
+        d.id === docId ? { ...d, folderId: targetFolderId } : d
+    ));
+
+    // Si le document déplacé est celui ouvert, on met à jour ses infos
+    if (activeDoc?.id === docId) {
+      setActiveDoc({ ...activeDoc, folderId: targetFolderId });
+    }
+  };
+
   const openHistory = async () => {
     if (!activeDoc) return;
     const history = await VersionController.getVersionHistory(activeDoc.id);
@@ -204,6 +219,7 @@ const MainView: React.FC<MainViewProps> = ({ user }) => {
                   onCreateDocument={handleCreate}
                   onRenameDocument={handleRename} // <--- NOUVEAU
                   onDeleteDocument={handleDelete}
+                  onMoveDocument={handleMove}
               />
           ) : activeDoc ? (
               <>
