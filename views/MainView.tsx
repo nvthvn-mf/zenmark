@@ -78,6 +78,14 @@ const MainView: React.FC<MainViewProps> = ({ user }) => {
     if (activeDoc?.id === id) setActiveDoc(null);
   };
 
+  const handleRename = async (id: string, newTitle: string) => {
+    await DocumentController.updateDocument(id, { title: newTitle });
+    // Mise à jour immédiate de l'interface
+    setDocuments(prev => prev.map(d => d.id === id ? { ...d, title: newTitle } : d));
+    // Si le doc est ouvert, on met à jour son titre aussi
+    if (activeDoc?.id === id) setActiveDoc({ ...activeDoc, title: newTitle });
+  };
+
   const openHistory = async () => {
     if (!activeDoc) return;
     const history = await VersionController.getVersionHistory(activeDoc.id);
@@ -194,6 +202,8 @@ const MainView: React.FC<MainViewProps> = ({ user }) => {
                   }}
                   onBack={() => setShowExplorer(false)}
                   onCreateDocument={handleCreate}
+                  onRenameDocument={handleRename} // <--- NOUVEAU
+                  onDeleteDocument={handleDelete}
               />
           ) : activeDoc ? (
               <>
