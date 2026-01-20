@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Document, Folder } from '../types';
 import { FolderController } from '../controllers/FolderController';
-import { DocumentController } from '../controllers/DocumentController'; // Ajouté
+import { DocumentController } from '../controllers/DocumentController'; // On le garde pour updateDocument si besoin, mais on va utiliser les props
 import Icon from '../components/Icon';
-import ContextMenu from '../components/ContextMenu'; // Ajouté
+import ContextMenu from '../components/ContextMenu';
 
 interface ExplorerViewProps {
     user: any;
@@ -11,6 +11,9 @@ interface ExplorerViewProps {
     onOpenDocument: (doc: Document) => void;
     onBack: () => void;
     onCreateDocument: (folderId: string | null) => void;
+    // AJOUT des nouvelles props
+    onRenameDocument: (id: string, newName: string) => void;
+    onDeleteDocument: (id: string) => void;
 }
 
 const ExplorerView: React.FC<ExplorerViewProps> = ({
@@ -18,21 +21,19 @@ const ExplorerView: React.FC<ExplorerViewProps> = ({
                                                        documents,
                                                        onOpenDocument,
                                                        onBack,
-                                                       onCreateDocument
+                                                       onCreateDocument,
+                                                       onRenameDocument, // Récupération
+                                                       onDeleteDocument  // Récupération
                                                    }) => {
-    // Navigation
+    // ... (États et loadFolders inchangés) ...
     const [currentPath, setCurrentPath] = useState<Folder[]>([]);
     const [folders, setFolders] = useState<Folder[]>([]);
     const [loading, setLoading] = useState(false);
-
-    // Actions Création
     const [isCreatingFolder, setIsCreatingFolder] = useState(false);
     const [newFolderName, setNewFolderName] = useState('');
-
-    // NOUVEAU : État du menu contextuel (ID de l'élément actif)
     const [activeMenuId, setActiveMenuId] = useState<string | null>(null);
 
-    // Chargement
+    // ... (loadFolders useEffect inchangé) ...
     const loadFolders = useCallback(async () => {
         try {
             setLoading(true);
@@ -53,8 +54,7 @@ const ExplorerView: React.FC<ExplorerViewProps> = ({
     const currentFolders = folders.filter(f => f.parent_id === currentFolderId);
     const currentDocs = documents.filter(d => (d.folderId || null) === currentFolderId && !d.isDeleted);
 
-    // --- GESTION DES DOSSIERS ---
-
+    // ... (Gestion des Dossiers inchangée : handleCreateFolder, handleRenameFolder, handleDeleteFolder) ...
     const handleCreateFolder = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!newFolderName.trim()) return;
@@ -78,12 +78,11 @@ const ExplorerView: React.FC<ExplorerViewProps> = ({
     };
 
     const handleDeleteFolder = async (folder: Folder) => {
-        // Vérification : Le dossier est-il vide ?
         const hasSubFolders = folders.some(f => f.parent_id === folder.id);
         const hasFiles = documents.some(d => d.folderId === folder.id && !d.isDeleted);
 
         if (hasSubFolders || hasFiles) {
-            alert("Impossible de supprimer un dossier non vide. Veuillez vider son contenu d'abord.");
+            alert("Impossible de supprimer un dossier non vide.");
             setActiveMenuId(null);
             return;
         }
@@ -95,26 +94,24 @@ const ExplorerView: React.FC<ExplorerViewProps> = ({
         setActiveMenuId(null);
     };
 
-    // --- GESTION DES FICHIERS ---
+    // --- CORRECTION : GESTION DES FICHIERS ---
 
     const handleRenameDocument = async (doc: Document) => {
         const newTitle = prompt("Nouveau nom du fichier :", doc.title);
         if (newTitle && newTitle !== doc.title) {
-            await DocumentController.updateDocument(doc.id, { title: newTitle });
-            // Pas besoin de recharger, MainView mettra à jour les props 'documents' automatiquement via le state
+            // MODIFICATION : On appelle la fonction du parent
+            onRenameDocument(doc.id, newTitle);
         }
         setActiveMenuId(null);
     };
 
     const handleDeleteDocument = async (doc: Document) => {
-        if (confirm(`Supprimer "${doc.title}" ?`)) {
-            await DocumentController.deleteDocument(doc.id);
-            // Idem, la suppression remontera via MainView
-        }
+        // MODIFICATION : On appelle la fonction du parent (qui gère déjà le confirm et le state)
+        onDeleteDocument(doc.id);
         setActiveMenuId(null);
     };
 
-    // --- NAVIGATION ---
+    // ... (Reste du fichier inchangé : navigation, render, etc.) ...
 
     const navigateToFolder = (folder: Folder) => {
         setCurrentPath([...currentPath, folder]);
@@ -128,7 +125,6 @@ const ExplorerView: React.FC<ExplorerViewProps> = ({
         }
     };
 
-    // Placeholder pour le Move (Prochaine étape)
     const handleMove = () => {
         alert("Fonctionnalité 'Déplacer' à venir dans la prochaine étape !");
         setActiveMenuId(null);
@@ -136,6 +132,7 @@ const ExplorerView: React.FC<ExplorerViewProps> = ({
 
     return (
         <div className="flex-1 h-full flex flex-col bg-slate-50" onClick={() => setActiveMenuId(null)}>
+            {/* ... (Tout le JSX reste identique) ... */}
 
             {/* BARRE D'OUTILS */}
             <div className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-6 sticky top-0 z-10">
@@ -212,15 +209,13 @@ const ExplorerView: React.FC<ExplorerViewProps> = ({
                             onClick={(e) => { e.stopPropagation(); navigateToFolder(folder); }}
                             className="group cursor-pointer bg-white p-4 rounded-xl border border-slate-200 hover:border-indigo-300 hover:shadow-md transition-all flex flex-col items-center text-center gap-3 relative"
                         >
-                            {/* Bouton Menu */}
                             <button
                                 onClick={(e) => { e.stopPropagation(); setActiveMenuId(activeMenuId === folder.id ? null : folder.id); }}
                                 className={`absolute top-2 right-2 p-1 rounded-md hover:bg-slate-100 text-slate-400 hover:text-slate-600 ${activeMenuId === folder.id ? 'opacity-100 bg-slate-100' : 'opacity-0 group-hover:opacity-100'} transition-all`}
                             >
-                                <Icon name="more" size={16} /> {/* Assurez-vous d'avoir 'more' ou 'more-vertical' dans Icon */}
+                                <Icon name="more" size={16} />
                             </button>
 
-                            {/* Menu Contextuel */}
                             {activeMenuId === folder.id && (
                                 <ContextMenu
                                     onRename={() => handleRenameFolder(folder)}
@@ -247,7 +242,6 @@ const ExplorerView: React.FC<ExplorerViewProps> = ({
                             onClick={(e) => { e.stopPropagation(); onOpenDocument(doc); }}
                             className="group cursor-pointer bg-white p-4 rounded-xl border border-slate-200 hover:border-indigo-300 hover:shadow-md transition-all flex flex-col items-center text-center gap-3 relative"
                         >
-                            {/* Bouton Menu */}
                             <button
                                 onClick={(e) => { e.stopPropagation(); setActiveMenuId(activeMenuId === doc.id ? null : doc.id); }}
                                 className={`absolute top-2 right-2 p-1 rounded-md hover:bg-slate-100 text-slate-400 hover:text-slate-600 ${activeMenuId === doc.id ? 'opacity-100 bg-slate-100' : 'opacity-0 group-hover:opacity-100'} transition-all`}
@@ -255,7 +249,6 @@ const ExplorerView: React.FC<ExplorerViewProps> = ({
                                 <Icon name="more" size={16} />
                             </button>
 
-                            {/* Menu Contextuel */}
                             {activeMenuId === doc.id && (
                                 <ContextMenu
                                     onRename={() => handleRenameDocument(doc)}
