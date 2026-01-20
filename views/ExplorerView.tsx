@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Document, Folder } from '../types';
 import { FolderController } from '../controllers/FolderController';
-import { DocumentController } from '../controllers/DocumentController'; // On le garde pour updateDocument si besoin, mais on va utiliser les props
+import { DocumentController } from '../controllers/DocumentController';
 import Icon from '../components/Icon';
 import ContextMenu from '../components/ContextMenu';
+import MoveModal from '../components/MoveModal'; // <--- 1. Import
 
 interface ExplorerViewProps {
     user: any;
@@ -11,7 +12,6 @@ interface ExplorerViewProps {
     onOpenDocument: (doc: Document) => void;
     onBack: () => void;
     onCreateDocument: (folderId: string | null) => void;
-    // AJOUT des nouvelles props
     onRenameDocument: (id: string, newName: string) => void;
     onDeleteDocument: (id: string) => void;
 }
@@ -22,18 +22,25 @@ const ExplorerView: React.FC<ExplorerViewProps> = ({
                                                        onOpenDocument,
                                                        onBack,
                                                        onCreateDocument,
-                                                       onRenameDocument, // Récupération
-                                                       onDeleteDocument  // Récupération
+                                                       onRenameDocument,
+                                                       onDeleteDocument
                                                    }) => {
-    // ... (États et loadFolders inchangés) ...
+    // Navigation & Data
     const [currentPath, setCurrentPath] = useState<Folder[]>([]);
     const [folders, setFolders] = useState<Folder[]>([]);
     const [loading, setLoading] = useState(false);
+
+    // Actions Création
     const [isCreatingFolder, setIsCreatingFolder] = useState(false);
     const [newFolderName, setNewFolderName] = useState('');
+
+    // Menus & Modales
     const [activeMenuId, setActiveMenuId] = useState<string | null>(null);
 
-    // ... (loadFolders useEffect inchangé) ...
+    // 2. NOUVEL ÉTAT : L'élément qu'on veut déplacer
+    const [itemToMove, setItemToMove] = useState<{ id: string; name: string; type: 'file' | 'folder' } | null>(null);
+
+    // --- CHARGEMENT ---
     const loadFolders = useCallback(async () => {
         try {
             setLoading(true);
@@ -54,7 +61,43 @@ const ExplorerView: React.FC<ExplorerViewProps> = ({
     const currentFolders = folders.filter(f => f.parent_id === currentFolderId);
     const currentDocs = documents.filter(d => (d.folderId || null) === currentFolderId && !d.isDeleted);
 
-    // ... (Gestion des Dossiers inchangée : handleCreateFolder, handleRenameFolder, handleDeleteFolder) ...
+    // --- LOGIQUE DE DÉPLACEMENT (NOUVEAU) ---
+
+    // Déclenché quand on clique sur "Déplacer" dans le menu contextuel
+    const startMove = (id: string, name: string, type: 'file' | 'folder') => {
+        setItemToMove({ id, name, type });
+        setActiveMenuId(null); // On ferme le menu contextuel
+    };
+
+    // Déclenché quand on choisit une destination dans la Modale
+    const handleMoveConfirm = async (targetFolderId: string | null) => {
+        if (!itemToMove) return;
+
+        try {
+            if (itemToMove.type === 'file') {
+                // 1. Déplacer un fichier
+                await DocumentController.moveDocument(itemToMove.id, targetFolderId);
+                // Note : Pas besoin de recharger docs, MainView le gère via props ou un refresh global serait idéal
+                // Pour l'instant on compte sur le fait que MainView ne voit pas le changement de folderId en temps réel sans refresh
+                // Astuce : On force un petit reload visuel local si besoin, mais le mieux est que MainView mette à jour la liste.
+                // Comme moveDocument met à jour la DB locale, un petit délai ou callback serait bien.
+                // Ici, simple alert de succès ou rien.
+            } else {
+                // 2. Déplacer un dossier
+                await FolderController.moveFolder(itemToMove.id, targetFolderId);
+                await loadFolders(); // On recharge la structure des dossiers
+            }
+        } catch (err) {
+            alert("Erreur lors du déplacement");
+            console.error(err);
+        } finally {
+            setItemToMove(null); // On ferme la modale
+        }
+    };
+
+
+    // --- GESTION DOSSIERS ---
+
     const handleCreateFolder = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!newFolderName.trim()) return;
@@ -64,12 +107,12 @@ const ExplorerView: React.FC<ExplorerViewProps> = ({
             setIsCreatingFolder(false);
             await loadFolders();
         } catch (err) {
-            alert("Erreur lors de la création du dossier");
+            alert("Erreur création dossier");
         }
     };
 
     const handleRenameFolder = async (folder: Folder) => {
-        const newName = prompt("Nouveau nom du dossier :", folder.name);
+        const newName = prompt("Nouveau nom :", folder.name);
         if (newName && newName !== folder.name) {
             await FolderController.renameFolder(folder.id, newName);
             await loadFolders();
@@ -80,59 +123,52 @@ const ExplorerView: React.FC<ExplorerViewProps> = ({
     const handleDeleteFolder = async (folder: Folder) => {
         const hasSubFolders = folders.some(f => f.parent_id === folder.id);
         const hasFiles = documents.some(d => d.folderId === folder.id && !d.isDeleted);
-
         if (hasSubFolders || hasFiles) {
-            alert("Impossible de supprimer un dossier non vide.");
+            alert("Dossier non vide !");
             setActiveMenuId(null);
             return;
         }
-
-        if (confirm(`Supprimer le dossier "${folder.name}" ?`)) {
+        if (confirm(`Supprimer "${folder.name}" ?`)) {
             await FolderController.deleteFolder(folder.id);
             await loadFolders();
         }
         setActiveMenuId(null);
     };
 
-    // --- CORRECTION : GESTION DES FICHIERS ---
+    // --- GESTION FICHIERS ---
 
     const handleRenameDocument = async (doc: Document) => {
-        const newTitle = prompt("Nouveau nom du fichier :", doc.title);
+        const newTitle = prompt("Renommer le fichier :", doc.title);
         if (newTitle && newTitle !== doc.title) {
-            // MODIFICATION : On appelle la fonction du parent
             onRenameDocument(doc.id, newTitle);
         }
         setActiveMenuId(null);
     };
 
     const handleDeleteDocument = async (doc: Document) => {
-        // MODIFICATION : On appelle la fonction du parent (qui gère déjà le confirm et le state)
         onDeleteDocument(doc.id);
         setActiveMenuId(null);
     };
 
-    // ... (Reste du fichier inchangé : navigation, render, etc.) ...
-
+    // --- NAVIGATION ---
     const navigateToFolder = (folder: Folder) => {
         setCurrentPath([...currentPath, folder]);
     };
-
     const navigateUp = (index: number) => {
-        if (index === -1) {
-            setCurrentPath([]);
-        } else {
-            setCurrentPath(currentPath.slice(0, index + 1));
-        }
-    };
-
-    const handleMove = () => {
-        alert("Fonctionnalité 'Déplacer' à venir dans la prochaine étape !");
-        setActiveMenuId(null);
+        if (index === -1) setCurrentPath([]);
+        else setCurrentPath(currentPath.slice(0, index + 1));
     };
 
     return (
         <div className="flex-1 h-full flex flex-col bg-slate-50" onClick={() => setActiveMenuId(null)}>
-            {/* ... (Tout le JSX reste identique) ... */}
+
+            {/* 4. MODALE DE DÉPLACEMENT */}
+            <MoveModal
+                itemToMove={itemToMove}
+                folders={folders}
+                onMove={handleMoveConfirm}
+                onClose={() => setItemToMove(null)}
+            />
 
             {/* BARRE D'OUTILS */}
             <div className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-6 sticky top-0 z-10">
@@ -220,7 +256,7 @@ const ExplorerView: React.FC<ExplorerViewProps> = ({
                                 <ContextMenu
                                     onRename={() => handleRenameFolder(folder)}
                                     onDelete={() => handleDeleteFolder(folder)}
-                                    onMove={handleMove}
+                                    onMove={() => startMove(folder.id, folder.name, 'folder')} // <--- Action Déplacer
                                     onClose={() => setActiveMenuId(null)}
                                 />
                             )}
@@ -253,7 +289,7 @@ const ExplorerView: React.FC<ExplorerViewProps> = ({
                                 <ContextMenu
                                     onRename={() => handleRenameDocument(doc)}
                                     onDelete={() => handleDeleteDocument(doc)}
-                                    onMove={handleMove}
+                                    onMove={() => startMove(doc.id, doc.title, 'file')} // <--- Action Déplacer
                                     onClose={() => setActiveMenuId(null)}
                                 />
                             )}
