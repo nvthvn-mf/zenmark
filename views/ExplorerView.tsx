@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { Document, Folder } from '../types';
-import { FolderController } from '../controllers/FolderController';
-import { DocumentController } from '../controllers/DocumentController';
+import React, {useState, useEffect, useCallback} from 'react';
+import {Document, Folder} from '../types';
+import {FolderController} from '../controllers/FolderController';
+import {DocumentController} from '../controllers/DocumentController';
 import Icon from '../components/Icon';
 import ContextMenu from '../components/ContextMenu';
 import MoveModal from '../components/MoveModal'; // <--- 1. Import
@@ -67,7 +67,7 @@ const ExplorerView: React.FC<ExplorerViewProps> = ({
 
     // Déclenché quand on clique sur "Déplacer" dans le menu contextuel
     const startMove = (id: string, name: string, type: 'file' | 'folder') => {
-        setItemToMove({ id, name, type });
+        setItemToMove({id, name, type});
         setActiveMenuId(null); // On ferme le menu contextuel
     };
 
@@ -168,10 +168,13 @@ const ExplorerView: React.FC<ExplorerViewProps> = ({
             />
 
             {/* BARRE D'OUTILS */}
-            <div className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-6 sticky top-0 z-10">
-                <div className="flex items-center gap-2 text-sm text-slate-600 overflow-x-auto no-scrollbar flex-1 mr-4">
-                    <button onClick={onBack} className="p-1 hover:bg-slate-100 rounded-lg mr-2" title="Retour Dashboard">
-                        <Icon name="home" size={18} />
+            <div
+                className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-6 sticky top-0 z-10">
+                <div
+                    className="flex items-center gap-2 text-sm text-slate-600 overflow-x-auto no-scrollbar flex-1 mr-4">
+                    <button onClick={onBack} className="p-1 hover:bg-slate-100 rounded-lg mr-2"
+                            title="Retour Dashboard">
+                        <Icon name="home" size={18}/>
                     </button>
 
                     <button
@@ -199,14 +202,17 @@ const ExplorerView: React.FC<ExplorerViewProps> = ({
                         onClick={() => onCreateDocument(currentFolderId)}
                         className="flex items-center gap-2 px-3 py-1.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-sm font-medium shadow-sm shadow-indigo-200"
                     >
-                        <Icon name="plus" size={16} /> Fichier
+                        <Icon name="plus" size={16}/> Fichier
                     </button>
 
                     <button
-                        onClick={(e) => { e.stopPropagation(); setIsCreatingFolder(true); }}
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            setIsCreatingFolder(true);
+                        }}
                         className="flex items-center gap-2 px-3 py-1.5 bg-white border border-slate-200 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors text-sm font-medium"
                     >
-                        <Icon name="grid" size={16} /> Dossier
+                        <Icon name="grid" size={16}/> Dossier
                     </button>
                 </div>
             </div>
@@ -217,8 +223,9 @@ const ExplorerView: React.FC<ExplorerViewProps> = ({
                 {isCreatingFolder && (
                     <form onSubmit={handleCreateFolder} className="mb-6 max-w-sm" onClick={e => e.stopPropagation()}>
                         <div className="flex items-center gap-2">
-                            <div className="w-10 h-10 bg-indigo-100 text-indigo-500 rounded-xl flex items-center justify-center">
-                                <Icon name="grid" size={20} />
+                            <div
+                                className="w-10 h-10 bg-indigo-100 text-indigo-500 rounded-xl flex items-center justify-center">
+                                <Icon name="grid" size={20}/>
                             </div>
                             <input
                                 autoFocus
@@ -239,14 +246,20 @@ const ExplorerView: React.FC<ExplorerViewProps> = ({
                     {currentFolders.map(folder => (
                         <div
                             key={folder.id}
-                            onClick={(e) => { e.stopPropagation(); navigateToFolder(folder); }}
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                navigateToFolder(folder);
+                            }}
                             className="group cursor-pointer bg-white p-4 rounded-xl border border-slate-200 hover:border-indigo-300 hover:shadow-md transition-all flex flex-col items-center text-center gap-3 relative"
                         >
                             <button
-                                onClick={(e) => { e.stopPropagation(); setActiveMenuId(activeMenuId === folder.id ? null : folder.id); }}
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    setActiveMenuId(activeMenuId === folder.id ? null : folder.id);
+                                }}
                                 className={`absolute top-2 right-2 p-1 rounded-md hover:bg-slate-100 text-slate-400 hover:text-slate-600 ${activeMenuId === folder.id ? 'opacity-100 bg-slate-100' : 'opacity-0 group-hover:opacity-100'} transition-all`}
                             >
-                                <Icon name="more" size={16} />
+                                <Icon name="more" size={16}/>
                             </button>
 
                             {activeMenuId === folder.id && (
@@ -258,9 +271,10 @@ const ExplorerView: React.FC<ExplorerViewProps> = ({
                                 />
                             )}
 
-                            <div className="w-16 h-12 bg-indigo-50 text-indigo-500 rounded-lg flex items-center justify-center group-hover:bg-indigo-100 transition-colors relative">
+                            <div
+                                className="w-16 h-12 bg-indigo-50 text-indigo-500 rounded-lg flex items-center justify-center group-hover:bg-indigo-100 transition-colors relative">
                                 <div className="absolute top-0 left-0 w-6 h-3 bg-inherit rounded-t-md -mt-1 ml-2"></div>
-                                <Icon name="grid" size={24} />
+                                <Icon name="grid" size={24}/>
                             </div>
                             <span className="text-sm font-medium text-slate-700 truncate w-full px-2 select-none">
                 {folder.name}
@@ -272,14 +286,20 @@ const ExplorerView: React.FC<ExplorerViewProps> = ({
                     {currentDocs.map(doc => (
                         <div
                             key={doc.id}
-                            onClick={(e) => { e.stopPropagation(); onOpenDocument(doc); }}
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                onOpenDocument(doc);
+                            }}
                             className="group cursor-pointer bg-white p-4 rounded-xl border border-slate-200 hover:border-indigo-300 hover:shadow-md transition-all flex flex-col items-center text-center gap-3 relative"
                         >
                             <button
-                                onClick={(e) => { e.stopPropagation(); setActiveMenuId(activeMenuId === doc.id ? null : doc.id); }}
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    setActiveMenuId(activeMenuId === doc.id ? null : doc.id);
+                                }}
                                 className={`absolute top-2 right-2 p-1 rounded-md hover:bg-slate-100 text-slate-400 hover:text-slate-600 ${activeMenuId === doc.id ? 'opacity-100 bg-slate-100' : 'opacity-0 group-hover:opacity-100'} transition-all`}
                             >
-                                <Icon name="more" size={16} />
+                                <Icon name="more" size={16}/>
                             </button>
 
                             {activeMenuId === doc.id && (
@@ -291,8 +311,10 @@ const ExplorerView: React.FC<ExplorerViewProps> = ({
                                 />
                             )}
 
-                            <div className="w-12 h-14 bg-white border border-slate-200 relative shadow-sm group-hover:-translate-y-1 transition-transform">
-                                <div className="absolute top-0 right-0 border-t-[12px] border-r-[12px] border-t-slate-100 border-r-slate-50"></div>
+                            <div
+                                className="w-12 h-14 bg-white border border-slate-200 relative shadow-sm group-hover:-translate-y-1 transition-transform">
+                                <div
+                                    className="absolute top-0 right-0 border-t-[12px] border-r-[12px] border-t-slate-100 border-r-slate-50"></div>
                                 <div className="p-1 mt-2 text-[6px] text-slate-300 space-y-1 overflow-hidden h-full">
                                     <div className="h-0.5 bg-current w-3/4"></div>
                                     <div className="h-0.5 bg-current w-full"></div>
@@ -315,7 +337,7 @@ const ExplorerView: React.FC<ExplorerViewProps> = ({
                     {currentFolders.length === 0 && currentDocs.length === 0 && !isCreatingFolder && (
                         <div className="col-span-full py-20 text-center">
                             <div className="inline-block p-4 rounded-full bg-slate-100 text-slate-400 mb-3">
-                                <Icon name="search" size={24} />
+                                <Icon name="search" size={24}/>
                             </div>
                             <p className="text-slate-500 mb-4">Ce dossier est vide.</p>
                             <button
