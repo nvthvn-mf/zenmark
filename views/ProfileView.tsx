@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { AuthController } from '../controllers/AuthController';
+import React, {useState, useEffect} from 'react';
+import {AuthController} from '../controllers/AuthController';
 import Icon from '../components/Icon';
 
 interface ProfileViewProps {
@@ -7,7 +7,7 @@ interface ProfileViewProps {
     onBack: () => void;
 }
 
-const ProfileView: React.FC<ProfileViewProps> = ({ user, onBack }) => {
+const ProfileView: React.FC<ProfileViewProps> = ({user, onBack}) => {
     // --- Infos Personnelles ---
     const [firstName, setFirstName] = useState('');
     const [lastName, setLastName] = useState('');
@@ -23,7 +23,7 @@ const ProfileView: React.FC<ProfileViewProps> = ({ user, onBack }) => {
 
     // --- Etats ---
     const [loading, setLoading] = useState(false);
-    const [message, setMessage] = useState({ type: '', text: '' });
+    const [message, setMessage] = useState({type: '', text: ''});
 
     useEffect(() => {
         if (user) {
@@ -36,16 +36,16 @@ const ProfileView: React.FC<ProfileViewProps> = ({ user, onBack }) => {
 
     // Helper pour afficher les messages
     const showMessage = (type: string, text: string) => {
-        setMessage({ type, text });
+        setMessage({type, text});
         if (type === 'success') {
-            setTimeout(() => setMessage({ type: '', text: '' }), 5000);
+            setTimeout(() => setMessage({type: '', text: ''}), 5000);
         }
     };
 
     const handleUpdateProfile = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
-        setMessage({ type: '', text: '' });
+        setMessage({type: '', text: ''});
         try {
             await AuthController.updateProfile(firstName, lastName);
             showMessage('success', 'Informations mises à jour avec succès !');
@@ -62,7 +62,7 @@ const ProfileView: React.FC<ProfileViewProps> = ({ user, onBack }) => {
         if (!confirm(`Attention : Un lien de confirmation sera envoyé à ${newEmail} ET à l'ancienne adresse.`)) return;
 
         setLoading(true);
-        setMessage({ type: '', text: '' });
+        setMessage({type: '', text: ''});
         try {
             await AuthController.updateEmail(newEmail);
             showMessage('success', 'Demande envoyée ! Vérifiez vos DEUX boîtes mail.');
@@ -76,7 +76,7 @@ const ProfileView: React.FC<ProfileViewProps> = ({ user, onBack }) => {
     // Gestionnaire pour le mot de passe
     const handleUpdatePassword = async (e: React.FormEvent) => {
         e.preventDefault();
-        setMessage({ type: '', text: '' });
+        setMessage({type: '', text: ''});
 
         if (password !== confirmPassword) {
             showMessage('error', 'Les nouveaux mots de passe ne correspondent pas.');
@@ -113,7 +113,7 @@ const ProfileView: React.FC<ProfileViewProps> = ({ user, onBack }) => {
                         onClick={onBack}
                         className="p-2 hover:bg-white rounded-full transition-colors text-slate-500 hover:text-slate-700"
                     >
-                        <Icon name="home" size={20} />
+                        <Icon name="home" size={20}/>
                     </button>
                     <h1 className="text-2xl font-bold text-slate-800">Paramètres du compte</h1>
                 </div>
@@ -123,7 +123,7 @@ const ProfileView: React.FC<ProfileViewProps> = ({ user, onBack }) => {
                     <div className={`p-4 rounded-xl border flex items-start gap-3 ${
                         message.type === 'success' ? 'bg-green-50 border-green-100 text-green-800' : 'bg-red-50 border-red-100 text-red-800'
                     }`}>
-                        <Icon name={message.type === 'success' ? 'check' : 'x'} size={20} className="mt-0.5" />
+                        <Icon name={message.type === 'success' ? 'check' : 'x'} size={20} className="mt-0.5"/>
                         <p className="text-sm font-medium">{message.text}</p>
                     </div>
                 )}
@@ -132,7 +132,7 @@ const ProfileView: React.FC<ProfileViewProps> = ({ user, onBack }) => {
                 <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
                     <div className="p-6 border-b border-slate-100 bg-slate-50/50">
                         <h2 className="font-semibold text-slate-800 flex items-center gap-2">
-                            <Icon name="file" size={18} className="text-indigo-500" />
+                            <Icon name="file" size={18} className="text-indigo-500"/>
                             Identité
                         </h2>
                     </div>
@@ -175,7 +175,7 @@ const ProfileView: React.FC<ProfileViewProps> = ({ user, onBack }) => {
                 <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
                     <div className="p-6 border-b border-slate-100 bg-slate-50/50">
                         <h2 className="font-semibold text-slate-800 flex items-center gap-2">
-                            <Icon name="cloud" size={18} className="text-indigo-500" />
+                            <Icon name="cloud" size={18} className="text-indigo-500"/>
                             Adresse Email
                         </h2>
                     </div>
@@ -207,7 +207,8 @@ const ProfileView: React.FC<ProfileViewProps> = ({ user, onBack }) => {
                 <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
                     <div className="p-6 border-b border-slate-100 bg-slate-50/50">
                         <h2 className="font-semibold text-slate-800 flex items-center gap-2">
-                            <Icon name="settings" size={18} className="text-indigo-500" /> {/* On utilise settings faute de cadenas */}
+                            <Icon name="settings" size={18}
+                                  className="text-indigo-500"/> {/* On utilise settings faute de cadenas */}
                             Sécurité
                         </h2>
                         <p className="text-xs text-slate-500 mt-1">Modifiez votre mot de passe</p>
@@ -216,7 +217,8 @@ const ProfileView: React.FC<ProfileViewProps> = ({ user, onBack }) => {
                         <form onSubmit={handleUpdatePassword} className="space-y-4">
 
                             <div>
-                                <label className="block text-sm font-medium text-slate-700 mb-1">Ancien mot de passe</label>
+                                <label className="block text-sm font-medium text-slate-700 mb-1">Ancien mot de
+                                    passe</label>
                                 <input
                                     type="password"
                                     required
@@ -229,7 +231,8 @@ const ProfileView: React.FC<ProfileViewProps> = ({ user, onBack }) => {
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
-                                    <label className="block text-sm font-medium text-slate-700 mb-1">Nouveau mot de passe</label>
+                                    <label className="block text-sm font-medium text-slate-700 mb-1">Nouveau mot de
+                                        passe</label>
                                     <input
                                         type="password"
                                         required
@@ -240,7 +243,8 @@ const ProfileView: React.FC<ProfileViewProps> = ({ user, onBack }) => {
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-slate-700 mb-1">Confirmer le nouveau</label>
+                                    <label className="block text-sm font-medium text-slate-700 mb-1">Confirmer le
+                                        nouveau</label>
                                     <input
                                         type="password"
                                         required
