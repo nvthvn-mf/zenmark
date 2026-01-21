@@ -1,5 +1,5 @@
 import React from 'react';
-import { Document } from '../types';
+import {Document} from '../types';
 import Icon from '../components/Icon';
 
 interface DashboardViewProps {
@@ -49,8 +49,9 @@ const DashboardView: React.FC<DashboardViewProps> = ({
                         onClick={onCreateDocument}
                         className="flex items-center gap-4 p-6 bg-indigo-600 rounded-2xl text-white hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-200 group"
                     >
-                        <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
-                            <Icon name="plus" size={24} />
+                        <div
+                            className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
+                            <Icon name="plus" size={24}/>
                         </div>
                         <div className="text-left">
                             <div className="font-bold text-lg">Nouveau Document</div>
@@ -62,8 +63,9 @@ const DashboardView: React.FC<DashboardViewProps> = ({
                         onClick={onShowExplorer}
                         className="flex items-center gap-4 p-6 bg-white border border-slate-200 rounded-2xl text-slate-700 hover:border-indigo-300 transition-all group"
                     >
-                        <div className="w-12 h-12 bg-slate-100 rounded-xl flex items-center justify-center group-hover:bg-indigo-50 group-hover:text-indigo-600 transition-colors">
-                            <Icon name="grid" size={24} />
+                        <div
+                            className="w-12 h-12 bg-slate-100 rounded-xl flex items-center justify-center group-hover:bg-indigo-50 group-hover:text-indigo-600 transition-colors">
+                            <Icon name="grid" size={24}/>
                         </div>
                         <div className="text-left">
                             <div className="font-bold text-lg">Mes Dossiers</div>
@@ -98,11 +100,12 @@ const DashboardView: React.FC<DashboardViewProps> = ({
                                         className="absolute top-3 right-3 p-2 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-lg opacity-0 group-hover:opacity-100 transition-all"
                                         title="Supprimer"
                                     >
-                                        <Icon name="trash" size={16} />
+                                        <Icon name="trash" size={16}/>
                                     </button>
 
-                                    <div className="w-10 h-10 bg-slate-100 rounded-lg flex items-center justify-center text-slate-500 mb-4 group-hover:bg-indigo-50 group-hover:text-indigo-600 transition-colors">
-                                        <Icon name="file" size={20} />
+                                    <div
+                                        className="w-10 h-10 bg-slate-100 rounded-lg flex items-center justify-center text-slate-500 mb-4 group-hover:bg-indigo-50 group-hover:text-indigo-600 transition-colors">
+                                        <Icon name="file" size={20}/>
                                     </div>
                                     <h3 className="font-bold text-slate-800 truncate mb-1 pr-8">{doc.title || 'Sans titre'}</h3>
                                     <p className="text-xs text-slate-400">
@@ -111,7 +114,8 @@ const DashboardView: React.FC<DashboardViewProps> = ({
                                 </div>
                             ))
                         ) : (
-                            <div className="col-span-full py-12 text-center bg-white rounded-2xl border border-dashed border-slate-300">
+                            <div
+                                className="col-span-full py-12 text-center bg-white rounded-2xl border border-dashed border-slate-300">
                                 <p className="text-slate-400">Aucun document récent.</p>
                             </div>
                         )}
@@ -120,23 +124,28 @@ const DashboardView: React.FC<DashboardViewProps> = ({
 
                 {/* Pied de page (Restauré) */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pb-8">
-                    <div className="bg-indigo-900 text-white p-6 rounded-2xl flex items-center justify-between relative overflow-hidden group cursor-pointer">
+                    <div
+                        className="bg-indigo-900 text-white p-6 rounded-2xl flex items-center justify-between relative overflow-hidden group cursor-pointer">
                         <div className="relative z-10">
                             <h3 className="font-bold text-lg mb-1">Guide de démarrage</h3>
                             <p className="text-indigo-200 text-sm">Apprenez les bases du Markdown</p>
                         </div>
                         {/* Note: Assurez-vous que l'icône 'more' existe dans Icon.tsx, sinon utilisez 'help-circle' */}
-                        <Icon name="more" className="relative z-10 opacity-50 group-hover:opacity-100 transition-opacity" />
-                        <div className="absolute right-0 top-0 w-32 h-32 bg-white opacity-5 rounded-full blur-2xl transform translate-x-10 -translate-y-10" />
+                        <Icon name="more"
+                              className="relative z-10 opacity-50 group-hover:opacity-100 transition-opacity"/>
+                        <div
+                            className="absolute right-0 top-0 w-32 h-32 bg-white opacity-5 rounded-full blur-2xl transform translate-x-10 -translate-y-10"/>
                     </div>
 
-                    <div className="bg-white border border-slate-200 p-6 rounded-2xl flex items-center justify-between hover:border-indigo-300 transition-colors cursor-pointer group">
+                    <div
+                        className="bg-white border border-slate-200 p-6 rounded-2xl flex items-center justify-between hover:border-indigo-300 transition-colors cursor-pointer group">
                         <div>
                             <h3 className="font-bold text-lg text-slate-800 mb-1">Export PDF</h3>
                             <p className="text-slate-500 text-sm">Convertissez vos notes en un clic</p>
                         </div>
-                        <div className="p-3 bg-slate-50 rounded-full text-slate-400 group-hover:bg-indigo-50 group-hover:text-indigo-600 transition-colors">
-                            <Icon name="download" />
+                        <div
+                            className="p-3 bg-slate-50 rounded-full text-slate-400 group-hover:bg-indigo-50 group-hover:text-indigo-600 transition-colors">
+                            <Icon name="download"/>
                         </div>
                     </div>
                 </div>
