@@ -1,96 +1,96 @@
-import { supabase } from '../services/supabase';
-import { AuthChangeEvent, Session } from '@supabase/supabase-js';
+import {supabase} from '../services/supabase';
+import {AuthChangeEvent, Session} from '@supabase/supabase-js';
 
 export const AuthController = {
-  async login(email: string, password: string) {
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) throw error;
-    return data.user;
-  },
+    async login(email: string, password: string) {
+        const {data, error} = await supabase.auth.signInWithPassword({email, password});
+        if (error) throw error;
+        return data.user;
+    },
 
-  async signUp(email: string, password: string, firstName: string, lastName: string) {
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        emailRedirectTo: window.location.origin,
-        data: {
-          first_name: firstName,
-          last_name: lastName,
-          full_name: `${firstName} ${lastName}`.trim()
-        }
-      }
-    });
-    if (error) throw error;
-    return data.user;
-  },
+    async signUp(email: string, password: string, firstName: string, lastName: string) {
+        const {data, error} = await supabase.auth.signUp({
+            email,
+            password,
+            options: {
+                emailRedirectTo: window.location.origin,
+                data: {
+                    first_name: firstName,
+                    last_name: lastName,
+                    full_name: `${firstName} ${lastName}`.trim()
+                }
+            }
+        });
+        if (error) throw error;
+        return data.user;
+    },
 
-  async logout() {
-    const { error } = await supabase.auth.signOut();
-    if (error) throw error;
-  },
+    async logout() {
+        const {error} = await supabase.auth.signOut();
+        if (error) throw error;
+    },
 
-  async getCurrentUser() {
-    const { data: { user } } = await supabase.auth.getUser();
-    return user;
-  },
+    async getCurrentUser() {
+        const {data: {user}} = await supabase.auth.getUser();
+        return user;
+    },
 
-  async updateProfile(firstName: string, lastName: string) {
-    const { data, error } = await supabase.auth.updateUser({
-      data: {
-        first_name: firstName,
-        last_name: lastName,
-        full_name: `${firstName} ${lastName}`.trim()
-      }
-    });
-    if (error) throw error;
-    return data.user;
-  },
+    async updateProfile(firstName: string, lastName: string) {
+        const {data, error} = await supabase.auth.updateUser({
+            data: {
+                first_name: firstName,
+                last_name: lastName,
+                full_name: `${firstName} ${lastName}`.trim()
+            }
+        });
+        if (error) throw error;
+        return data.user;
+    },
 
-  async updateEmail(newEmail: string) {
-    const { data, error } = await supabase.auth.updateUser({ email: newEmail });
-    if (error) throw error;
-    return data.user;
-  },
+    async updateEmail(newEmail: string) {
+        const {data, error} = await supabase.auth.updateUser({email: newEmail});
+        if (error) throw error;
+        return data.user;
+    },
 
-  async sendPasswordResetEmail(email: string) {
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: window.location.origin // Redirige vers localhost:3000
-    });
-    if (error) throw error;
-  },
+    async sendPasswordResetEmail(email: string) {
+        const {error} = await supabase.auth.resetPasswordForEmail(email, {
+            redirectTo: window.location.origin // Redirige vers localhost:3000
+        });
+        if (error) throw error;
+    },
 
 
-  async resetPassword(newPassword: string) {
-    const { data, error } = await supabase.auth.updateUser({ password: newPassword });
-    if (error) throw error;
-    return data.user;
-  },
+    async resetPassword(newPassword: string) {
+        const {data, error} = await supabase.auth.updateUser({password: newPassword});
+        if (error) throw error;
+        return data.user;
+    },
 
-  async updatePasswordWithCheck(oldPassword: string, newPassword: string) {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user || !user.email) throw new Error("Utilisateur non identifié");
+    async updatePasswordWithCheck(oldPassword: string, newPassword: string) {
+        const {data: {user}} = await supabase.auth.getUser();
+        if (!user || !user.email) throw new Error("Utilisateur non identifié");
 
-    const { error: signInError } = await supabase.auth.signInWithPassword({
-      email: user.email,
-      password: oldPassword
-    });
+        const {error: signInError} = await supabase.auth.signInWithPassword({
+            email: user.email,
+            password: oldPassword
+        });
 
-    if (signInError) throw new Error("L'ancien mot de passe est incorrect.");
+        if (signInError) throw new Error("L'ancien mot de passe est incorrect.");
 
-    const { data, error: updateError } = await supabase.auth.updateUser({
-      password: newPassword
-    });
+        const {data, error: updateError} = await supabase.auth.updateUser({
+            password: newPassword
+        });
 
-    if (updateError) throw updateError;
-    return data.user;
-  },
+        if (updateError) throw updateError;
+        return data.user;
+    },
 
-  // MODIFICATION CRITIQUE : On passe l'événement au callback pour détecter PASSWORD_RECOVERY
-  onAuthStateChange(callback: (event: AuthChangeEvent, session: Session | null) => void) {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      callback(event, session);
-    });
-    return subscription;
-  }
+    // MODIFICATION CRITIQUE : On passe l'événement au callback pour détecter PASSWORD_RECOVERY
+    onAuthStateChange(callback: (event: AuthChangeEvent, session: Session | null) => void) {
+        const {data: {subscription}} = supabase.auth.onAuthStateChange((event, session) => {
+            callback(event, session);
+        });
+        return subscription;
+    }
 };
