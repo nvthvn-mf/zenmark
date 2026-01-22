@@ -1,10 +1,10 @@
-import { marked } from 'marked';
+import {marked} from 'marked';
 
 export const ExportController = {
-  async exportToHTML(title: string, markdown: string): Promise<void> {
-    const contentHtml = await marked.parse(markdown);
+    async exportToHTML(title: string, markdown: string): Promise<void> {
+        const contentHtml = await marked.parse(markdown);
 
-    const html = `
+        const html = `
       <!DOCTYPE html>
       <html lang="fr">
       <head>
@@ -57,16 +57,16 @@ export const ExportController = {
       </html>
     `;
 
-    const blob = new Blob([html], { type: 'text/html' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${title.toLowerCase().replace(/[^a-z0-9]+/g, '-')}.html`;
-    a.click();
-    URL.revokeObjectURL(url);
-  },
+        const blob = new Blob([html], {type: 'text/html'});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${title.toLowerCase().replace(/[^a-z0-9]+/g, '-')}.html`;
+        a.click();
+        URL.revokeObjectURL(url);
+    },
 
-  async exportToPDF(): Promise<void> {
-    window.print();
-  }
+    async exportToPDF(): Promise<void> {
+        window.print();
+    }
 };
