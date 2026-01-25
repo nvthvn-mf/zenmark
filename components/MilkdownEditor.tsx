@@ -8,13 +8,14 @@ interface MilkdownEditorProps {
     readonly?: boolean;
 }
 
-const MilkdownEditor: React.FC<MilkdownEditorProps> = ({ content, onChange, readonly = false }) => {
+const MilkdownEditor: React.FC<MilkdownEditorProps> = ({content, onChange, readonly = false}) => {
     return (
         <div className="flex flex-1 h-full overflow-hidden bg-white">
             {/* ZONE GAUCHE : ÉDITEUR DE CODE (Masquée si readonly) */}
             {!readonly && (
                 <div className="w-1/2 h-full border-r border-slate-200 flex flex-col bg-slate-50">
-                    <div className="px-4 py-2 bg-slate-100 border-b border-slate-200 text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                    <div
+                        className="px-4 py-2 bg-slate-100 border-b border-slate-200 text-xs font-semibold text-slate-500 uppercase tracking-wider">
                         Markdown Source
                     </div>
                     <textarea
@@ -30,7 +31,8 @@ const MilkdownEditor: React.FC<MilkdownEditorProps> = ({ content, onChange, read
             {/* ZONE DROITE : APERÇU (Pleine largeur si readonly) */}
             <div className={`${readonly ? 'w-full max-w-4xl mx-auto' : 'w-1/2'} h-full flex flex-col bg-white`}>
                 {!readonly && (
-                    <div className="px-4 py-2 bg-white border-b border-slate-100 text-xs font-semibold text-slate-500 uppercase tracking-wider flex justify-between items-center">
+                    <div
+                        className="px-4 py-2 bg-white border-b border-slate-100 text-xs font-semibold text-slate-500 uppercase tracking-wider flex justify-between items-center">
                         <span>Preview</span>
                         <span className="text-[10px] bg-slate-100 px-2 py-0.5 rounded-full">
               {content.split(/\s+/).filter(Boolean).length} words
