@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, {useEffect, useRef} from 'react';
 import Icon from './Icon';
 
 interface ContextMenuProps {
@@ -8,7 +8,7 @@ interface ContextMenuProps {
     onClose: () => void;
 }
 
-const ContextMenu: React.FC<ContextMenuProps> = ({ onRename, onDelete, onMove, onClose }) => {
+const ContextMenu: React.FC<ContextMenuProps> = ({onRename, onDelete, onMove, onClose}) => {
     const menuRef = useRef<HTMLDivElement>(null);
 
     // Fermer le menu si on clique ailleurs
@@ -32,7 +32,7 @@ const ContextMenu: React.FC<ContextMenuProps> = ({ onRename, onDelete, onMove, o
                 onClick={onRename}
                 className="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 hover:text-indigo-600 flex items-center gap-2"
             >
-                <Icon name="file" size={14} /> {/* Faute d'icone 'edit', file fait l'affaire */}
+                <Icon name="file" size={14}/> {/* Faute d'icone 'edit', file fait l'affaire */}
                 Renommer
             </button>
 
@@ -40,17 +40,17 @@ const ContextMenu: React.FC<ContextMenuProps> = ({ onRename, onDelete, onMove, o
                 onClick={onMove}
                 className="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 hover:text-indigo-600 flex items-center gap-2"
             >
-                <Icon name="logout" size={14} /> {/* Icone flèche/sortie pour 'Déplacer' */}
+                <Icon name="logout" size={14}/> {/* Icone flèche/sortie pour 'Déplacer' */}
                 Déplacer
             </button>
 
-            <div className="h-px bg-slate-100 my-1 mx-2" />
+            <div className="h-px bg-slate-100 my-1 mx-2"/>
 
             <button
                 onClick={onDelete}
                 className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2"
             >
-                <Icon name="trash" size={14} />
+                <Icon name="trash" size={14}/>
                 Supprimer
             </button>
         </div>
